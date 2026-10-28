@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk Aquarium — DisplayXR inline 3D</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the tile == the scene's clearColor (BG in app.js), so the tile has no
+     visible rectangle and the tank seems to stand on its own. */
+  html,body{margin:0;background:#10151c;color:#e4e9ef;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:26px 20px 48px}
+  h1{font-size:26px;font-weight:600;margin:0 0 2px;letter-spacing:.01em}
+  .sub{color:#93a1b3;margin:0 0 16px}
+  /* Visually bare canvas: no border / radius / shadow / filter / opacity / animated transform on
+     it, on its ancestors, or on anything over it — any of those can take it out of the weave. */
+  .stage{position:relative}
+  #tank{display:block;width:100%;aspect-ratio:16/9}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#10151c}
+  /* All controls live BELOW the tile, never over it (nothing is drawn over 3D content). */
+  .controls{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center;margin-top:16px;
+            padding:12px 16px;border-radius:10px;background:#18202a}
+  .controls label{display:flex;gap:10px;align-items:center;color:#c3ccd8}
+  .controls input[type=range]{width:180px;accent-color:#4fb3c8}
+  button{font:inherit;color:#e9eef4;background:#24303d;border:1px solid #33475a;border-radius:8px;
+         padding:6px 16px;cursor:pointer}
+  button:hover:not(:disabled){background:#2c3b4b}
+  button:disabled,input:disabled{cursor:default;color:#6f7d8d}
+  #feed{background:#2b5560;border-color:#3d7685}
+  #feed:hover:not(:disabled){background:#336572}
+  #note{flex-basis:100%;margin:0;font-size:13px;color:#8796a8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Desk Aquarium</h1>
+  <p class="sub">A little planted tank with five fish. On a 3D display it stands in the screen —
+     move your head to look around the plants.</p>
+  <div class="stage">
+    <canvas id="tank" aria-label="An animated aquarium with five fish"></canvas>
+    <div id="cover"></div>
+  </div>
+  <div class="controls">
+    <button id="feed" type="button">Feed the fish</button>
+    <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <button id="mode" type="button">Show in 2D</button>
+    <p id="note"></p>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

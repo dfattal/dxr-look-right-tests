@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly sales by region</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the tile == the scene's clearColor (BG in app.js). */
+  html,body{margin:0;background:#f3f4f6;color:#1d2230;font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:28px;margin:0 0 2px}
+  .sub{color:#5a6070;margin:0 0 18px}
+  .layout{display:grid;grid-template-columns:minmax(0,760px) 220px;gap:24px;align-items:start}
+  @media (max-width:900px){.layout{grid-template-columns:1fr}}
+  /* Bare canvas: no border/radius/shadow/filter/opacity/animated transform on it or over it. */
+  .stage{position:relative}
+  #chart{display:block;width:100%;aspect-ratio:16/9}
+  /* Only label over the tile: top-left, over empty background. Plain rgba(), no opacity/blur. */
+  .units{position:absolute;top:10px;left:12px;padding:2px 8px;border-radius:4px;
+         background:rgba(255,255,255,0.7);color:#3a4050;font-size:12px}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#f3f4f6}
+  .legend{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .legend li{display:flex;gap:10px;align-items:center}
+  .legend i{width:14px;height:14px;border-radius:3px;display:inline-block}
+  .legend h2,.controls h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#5a6070;margin:0 0 10px}
+  .controls{margin-top:28px;display:grid;gap:10px}
+  .controls label{display:flex;gap:10px;align-items:center}
+  .controls input{flex:1}
+  button{font:inherit;border-radius:8px;cursor:pointer;background:#fff;border:1px solid rgba(0,0,0,0.2);padding:6px 14px;justify-self:start}
+  #modeNote{font-size:13px;color:#5a6070;margin:0}
+  .quarters{color:#5a6070;font-size:13px;margin:6px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Quarterly sales by region</h1>
+  <p class="sub">North, South and West, Q1–Q4. On a 3D display the bars stand in the glass.</p>
+  <div class="layout">
+    <div>
+      <div class="stage">
+        <canvas id="chart"></canvas>
+        <span class="units">sales, $ millions</span>
+        <div id="cover"></div>
+      </div>
+      <p class="quarters">Quarters Q1 → Q4 run left to right; regions are rows, North at the back.
+        Values (Q1–Q4): North 12, 15, 14, 18 · South 9, 11, 13, 12 · West 7, 10, 12, 16.</p>
+    </div>
+    <aside>
+      <ul class="legend">
+        <h2>Regions</h2>
+        <li><i style="background:#3b6fd8"></i>North</li>
+        <li><i style="background:#e0803a"></i>South</li>
+        <li><i style="background:#3fa66b"></i>West</li>
+      </ul>
+      <div class="controls">
+        <h2>View</h2>
+        <label>3D strength <input id="depth" type="range" min="0" max="1" step="0.05" value="1" aria-label="3D strength"></label>
+        <button id="mode" type="button">Show in 2D</button>
+        <p id="modeNote"></p>
+      </div>
+    </aside>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

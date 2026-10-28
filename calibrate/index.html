@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depth calibration</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #1b1f27; color: #e8ecf2; font: 15px/1.45 system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 14px;
+         grid-template-columns: minmax(0, 1fr) 300px; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
+  #stage { width: 100%; aspect-ratio: 16 / 9; display: block; background: #1b1f27; }
+  .panel { background: #252b36; border-radius: 8px; padding: 12px 14px; }
+  h1 { font-size: 18px; margin: 0 0 6px; }
+  label { display: block; margin: 10px 0 2px; }
+  input[type=range] { width: 100%; }
+  .num { font-variant-numeric: tabular-nums; }
+  button { margin: 4px 4px 0 0; padding: 6px 10px; border-radius: 6px; border: 0; background: #3a4456; color: #fff; cursor: pointer; }
+  small { color: #9aa6b8; }
+</style>
+</head>
+<body>
+<main>
+  <canvas id="stage"></canvas>
+  <div class="panel">
+    <h1>Depth calibration</h1>
+    <small>Display rig, virtual display 0.24, 16:9 tile. A random-block texture gives the eyes something to fuse. Move one slider at a time and note where
+      the crate or the backdrop starts to look doubled or uncomfortable.</small>
+    <label>Crate depth (tile heights; + = out of the glass): <b id="cv" class="num"></b></label>
+    <input id="crate" type="range" min="-1.5" max="0.8" step="0.05" value="0">
+    <label>Crate size (tile heights): <b id="sv" class="num"></b></label>
+    <input id="size" type="range" min="0.1" max="0.8" step="0.05" value="0.4">
+    <label>Backdrop depth (tile heights behind): <b id="bv" class="num"></b></label>
+    <input id="back" type="range" min="0" max="4" step="0.1" value="1">
+    <label><input id="edge" type="checkbox"> Move the crate to the left edge</label>
+    <label><input id="spin" type="checkbox" checked> Spin the crate</label>
+    <p class="num" id="read"></p>
+    <small>Disparity ≈ 10 × depth × (tile height / tile width) % of width, viewer at 0.6 m.</small>
+    <p id="status"></p>
+  </div>
+</main>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../newdocs/sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../newdocs/sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { createInline3D } from '@displayxr/inline3d';
+import { EyeCamera } from '@displayxr/inline3d/three';
+
+const VDH = 0.24;                       // display rig: the tile's height spans 0.24 world units
+const canvas = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(1);
+renderer.setClearColor(0x1b1f27, 1);    // opaque, matching the page
+renderer.autoClear = false;
+
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight(0xdde6ff, 0x202430, 1.0));
+const sun = new THREE.DirectionalLight(0xffffff, 0.8); sun.position.set(0.3, 0.6, 0.8); scene.add(sun);
+
+// A checker crate (texture gives the eyes something to fuse) and a checker backdrop.
+function checker(a, b, seed = 1) {
+  // random blocks, not a regular checker: a periodic pattern can fuse at the wrong repeat
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d');
+  let r = seed; const rnd = () => ((r = (r * 16807) % 2147483647) / 2147483647);
+  g.fillStyle = b; g.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 900; i++) { g.fillStyle = rnd() < 0.5 ? a : b; const w = 4 + rnd() * 18; g.fillRect(rnd() * 256, rnd() * 256, w, w * (0.5 + rnd())); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const crate = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ map: checker('#d99a4a', '#6a3d14', 7), roughness: 0.7 }));
+scene.add(crate);
+const backTex = checker('#5a7aa0', '#22344f', 3);
+const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ map: backTex, roughness: 1 }));
+scene.add(backdrop);
+
+const ui = Object.fromEntries(['crate', 'size', 'back', 'edge', 'spin', 'cv', 'sv', 'bv', 'read', 'status'].map((id) => [id, document.getElementById(id)]));
+const pct = (d) => (10 * d * (9 / 16)).toFixed(2);
+function apply() {
+  const c = +ui.crate.value, s = +ui.size.value, b = +ui.back.value;
+  crate.scale.setScalar(s * VDH);
+  crate.position.set(ui.edge.checked ? -0.85 * VDH * 16 / 9 : 0, 0, c * VDH);
+  // the backdrop grows with depth so it always fills the frame
+  const k = 1 + b * 1.2;
+  backdrop.scale.set(VDH * 16 / 9 * k * 1.3, VDH * k * 1.3, 1);
+  backdrop.position.z = -b * VDH;
+  ui.cv.textContent = c.toFixed(2) + ' h'; ui.sv.textContent = s.toFixed(2) + ' h'; ui.bv.textContent = b.toFixed(1) + ' h';
+  const front = c + s / 2 * (ui.spin.checked ? Math.SQRT2 : 1);
+  ui.read.innerHTML = `crate front ≈ ${front.toFixed(2)} h (≈ ${pct(Math.max(front, 0))} % in front)<br>` +
+    `backdrop ≈ ${b.toFixed(1)} h behind (≈ ${pct(b)} %, small-depth approximation)`;
+}
+for (const id of ['crate', 'size', 'back', 'edge', 'spin']) ui[id].addEventListener('input', apply);
+apply();
+
+const eyes = [new EyeCamera(THREE), new EyeCamera(THREE)];
+const mono = new THREE.PerspectiveCamera(30, 16 / 9, 0.01, 50);
+mono.position.set(0, 0, VDH / (2 * Math.tan(15 * Math.PI / 180))); mono.lookAt(0, 0, 0);
+let last = null, t0 = performance.now();
+function animate() { if (ui.spin.checked) crate.rotation.y = (performance.now() - t0) * 0.0005; }
+
+function onFrame(views, layer) {
+  animate();
+  let vps = views && views.length >= 2 && layer ? views.slice(0, 2).map((v) => layer.getViewport(v)) : null;
+  if (vps && vps.every((vp) => vp && vp.width > 0)) last = { vps, m: views.slice(0, 2).map((v) => [Array.from(v.projectionMatrix), Array.from(v.transform.matrix)]) };
+  if (!last) return;                    // nothing good yet: keep what is on screen
+  renderer.clear(); renderer.setScissorTest(true);
+  for (let i = 0; i < 2; i++) {
+    const vp = last.vps[i];
+    renderer.setViewport(vp.x, vp.y, vp.width, vp.height); renderer.setScissor(vp.x, vp.y, vp.width, vp.height);
+    eyes[i].setFromMatrices(last.m[i][0], last.m[i][1]);
+    renderer.render(scene, eyes[i].camera);
+  }
+  renderer.setScissorTest(false);
+}
+
+function size(sbs) {
+  const dpr = devicePixelRatio || 1;
+  const w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
+  renderer.setSize(sbs ? w * 2 : w, h, false);
+}
+
+const wall = await createInline3D({ lazy: false });
+if (wall.supported) {
+  size(true);
+  wall.session.updateRenderState({ depthNear: 0.01, depthFar: 50 });
+  wall.addScene(canvas, onFrame, { virtualDisplayHeight: VDH, onResize: () => size(true) });
+  ui.status.textContent = 'inline-3D active';
+} else {
+  size(false);
+  ui.status.textContent = '2D fallback: open in the DisplayXR Browser for 3D';
+  addEventListener('resize', () => size(false));
+  (function loop() { requestAnimationFrame(loop); animate(); renderer.clear(); renderer.setViewport(0, 0, canvas.width, canvas.height); renderer.render(scene, mono); })();
+}
+</script>
+</body>
+</html>

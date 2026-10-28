@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabletop solar system — DisplayXR inline 3D</title>
+<link rel="icon" href="data:,">
+<style>
+  /* Page colour behind the canvas == the scene's clearColor (BG in app.js). */
+  html,body{margin:0;background:#050813;color:#e6e8ee;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 20px 40px}
+  h1{font-size:26px;margin:0 0 4px}
+  p{color:#a9b4c8;margin:0 0 16px}
+  /* Bare canvas: no border/radius/shadow/filter/opacity/animated transform on it or over it. */
+  .stage{position:relative}
+  #scene{display:block;width:100%;aspect-ratio:16/9}
+  #cover{position:absolute;inset:0;background:#050813}   /* removed in one step, never faded */
+  /* Controls live BELOW the tile, outside the picture, at the glass. */
+  .bar{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:16px}
+  .bar label{display:flex;gap:10px;align-items:center;color:#cdd6e6}
+  input[type=range]{width:200px}
+  button{font:inherit;color:#e6e8ee;background:#1b2440;border:1px solid #3a4a7a;border-radius:6px;padding:6px 14px;cursor:pointer}
+  button:disabled,input:disabled{cursor:default;color:#7d889f}
+  #modeNote{margin:10px 0 0;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tabletop solar system</h1>
+  <p>A sun, four planets and a moon circling on a table, in front of a field of stars. Move your head to look around it.</p>
+  <div class="stage">
+    <canvas id="scene"></canvas>
+    <div id="cover"></div>
+  </div>
+  <div class="bar">
+    <label>Depth <input id="depth" type="range" min="0" max="1" step="0.01" value="1"></label>
+    <button id="mode" type="button">Show in 2D</button>
+  </div>
+  <p id="modeNote"></p>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

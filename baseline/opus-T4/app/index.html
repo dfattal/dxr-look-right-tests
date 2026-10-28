@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly Sales by Region — 3D</title>
+<style>
+  /* One solid page colour. The 3D scene clears to exactly this colour (see BG in app.js), so the
+     woven tile has no visible edge, and nothing transparent ever reaches the weave (a transparent
+     woven frame comes out black on the panel). */
+  :root { --bg: #0e1118; --fg: #e8ebf2; --muted: #9aa3b5; --line: #262c3a; --accent: #6aa8ff; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 48px; }
+
+  header h1 { font-size: 28px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 18px 0 14px; padding: 0; list-style: none; }
+  .legend li { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; }
+  .legend .tot { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  /* THE WOVEN CANVAS. Rules from sdk/docs/woven-canvas-rules.md:
+     - visually bare: no border, radius, shadow, filter, opacity, mask (they get woven into the
+       side-by-side pair, or knock the canvas out of the weave);
+     - will-change: transform from the very first paint (rule 4);
+     - no ancestor with an effect either (.stage is a plain block).
+     Nothing is ever drawn OVER the canvas except the boot cover, which is a hard cut. */
+  .stage { position: relative; margin: 0; }
+  #chart { display: block; width: 100%; aspect-ratio: 3 / 2; max-height: 72vh;
+    will-change: transform; cursor: grab; touch-action: none; outline: none; }
+  #chart.dragging { cursor: grabbing; }
+  /* Opaque page-coloured cover that keeps a raw side-by-side frame off screen until the SDK says
+     the canvas is woven (handle.firstWoven). On top of the canvas, removed with a hard cut. */
+  .cover { position: absolute; inset: 0; background: var(--bg); display: grid; place-items: center;
+    color: var(--muted); font-size: 14px; }
+  .cover[hidden] { display: none; }
+
+  .readout { min-height: 1.5em; margin: 10px 0 0; text-align: center; color: var(--muted);
+    font-variant-numeric: tabular-nums; }
+  .readout b { color: var(--fg); }
+
+  /* Controls live BELOW the tile, never over it: flat DOM next to a woven rect stays panel-sharp. */
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 16px;
+    padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; }
+  .controls label { display: flex; align-items: center; gap: 12px; flex: 1 1 320px; }
+  .controls label span { white-space: nowrap; }
+  .controls output { min-width: 3.5em; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  input[type=range] { flex: 1; accent-color: var(--accent); min-width: 120px; }
+  input[type=range]:disabled { opacity: .45; }
+  button { font: inherit; font-weight: 600; color: var(--fg); background: #1b2130; border: 1px solid #34405a;
+    border-radius: 8px; padding: 8px 16px; cursor: pointer; min-width: 132px; }
+  button:hover { background: #222a3c; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button[aria-pressed="true"] { border-color: var(--accent); }
+
+  .status { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+  .status b { color: #7fe0a8; font-weight: 600; }
+  .hint { font-size: 13px; color: var(--muted); }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Quarterly Sales by Region</h1>
+    <p>Revenue in millions of dollars, Q1–Q4 · drag the chart to tilt it, hover a bar for its value</p>
+  </header>
+
+  <ul class="legend" aria-label="Legend">
+    <li><span class="sw" style="background:#5b9cff"></span>North <span class="tot">$59M</span></li>
+    <li><span class="sw" style="background:#ffad4d"></span>South <span class="tot">$45M</span></li>
+    <li><span class="sw" style="background:#3fcf9c"></span>West <span class="tot">$45M</span></li>
+  </ul>
+
+  <figure class="stage">
+    <canvas id="chart" role="img" tabindex="0"
+      aria-label="3D bar chart of quarterly sales in millions. North: 12, 15, 14, 18. South: 9, 11, 13, 12. West: 7, 10, 12, 16."></canvas>
+    <div class="cover" id="cover">Loading chart…</div>
+  </figure>
+  <p class="readout" id="readout" aria-live="polite">&nbsp;</p>
+
+  <div class="controls">
+    <label for="strength">
+      <span>3D strength</span>
+      <input id="strength" type="range" min="0" max="100" step="5" value="80">
+      <output id="strengthOut" for="strength">80%</output>
+    </label>
+    <button id="mode" type="button" aria-pressed="false">Switch to 2D</button>
+  </div>
+  <p class="status" id="status">Starting…</p>
+
+  <table class="sr-only">
+    <caption>Quarterly sales (millions of dollars)</caption>
+    <thead><tr><th>Region</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead>
+    <tbody>
+      <tr><th>North</th><td>12</td><td>15</td><td>14</td><td>18</td></tr>
+      <tr><th>South</th><td>9</td><td>11</td><td>13</td><td>12</td></tr>
+      <tr><th>West</th><td>7</td><td>10</td><td>12</td><td>16</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

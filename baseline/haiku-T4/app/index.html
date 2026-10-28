@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly sales by region · 3D bar chart</title>
+<style>
+  /* One dark colour for the page and for the scene's background, so the woven canvas's box
+     disappears into the page. The canvas itself has no border, radius, shadow, filter or opacity
+     (woven-canvas rules 7 and 9), and nothing with a background or backdrop-filter sits over it. */
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #0b0c12; color: #e6e9f5; }
+  body { font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 20px 48px; }
+  h1 { font-size: 26px; line-height: 1.2; margin: 0 0 4px; font-weight: 650; }
+  .sub { margin: 0 0 18px; opacity: .7; }
+
+  .stage { position: relative; max-width: 760px; margin: 0 auto; }
+  #chart { display: block; width: 100%; aspect-ratio: 16 / 9; }
+  /* Opaque cover on top of the canvas until handle.firstWoven settles. It is a hard cut when it
+     goes, never a fade (woven-canvas rule 5). */
+  .cover { position: absolute; inset: 0; background: #0b0c12; }
+  .cover[hidden] { display: none; }
+
+  .how { font-size: 14px; opacity: .65; margin: 10px 0 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; list-style: none; padding: 0; margin: 16px 0 0; }
+  .legend li { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .total { opacity: .6; font-variant-numeric: tabular-nums; }
+
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-top: 20px; }
+  .controls label { display: flex; align-items: center; gap: 12px; flex: 1 1 280px; }
+  .controls input[type="range"] { flex: 1; accent-color: #4ea3d8; }
+  .controls output { min-width: 3.5em; text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
+  button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid #3a4262;
+           background: #1a2034; color: inherit; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+
+  .status { min-height: 1.5em; margin: 16px 0 0; font-size: 14px; opacity: .8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Quarterly sales by region</h1>
+  <p class="sub">Q1–Q4, in millions</p>
+
+  <div class="stage">
+    <canvas id="chart" role="img" aria-label="3D bar chart of quarterly sales by region, in millions"></canvas>
+    <div class="cover" id="cover" aria-hidden="true"></div>
+  </div>
+  <p class="how">Quarters run left to right, regions run toward you, bar height is sales.</p>
+
+  <ul class="legend" id="legend" aria-label="Regions, with yearly totals in millions"></ul>
+
+  <div class="controls">
+    <label>
+      <span>3D strength</span>
+      <input id="depth" type="range" min="0" max="100" step="1" value="100">
+      <output id="depthOut" for="depth">100%</output>
+    </label>
+    <button id="mode" type="button">Switch to 2D</button>
+  </div>
+
+  <p class="status" id="status" aria-live="polite"></p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

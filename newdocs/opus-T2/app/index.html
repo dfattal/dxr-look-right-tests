@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orrery — a tabletop solar system in 3D</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the canvas == the scene's clearColor (BG in app.js). */
+  html,body{margin:0;background:#04060c;color:#e4e8f2;font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:26px 20px 56px}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:.01em}
+  .sub{color:#9aa6bd;margin:0 0 18px}
+  /* Visually bare canvas: no border/radius/shadow/filter/opacity/animated transform on it, its
+     ancestors or anything over it. Nothing is drawn over the tile at all: all UI is below it. */
+  .stage{position:relative}
+  #scene{display:block;width:100%;aspect-ratio:16/9}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#04060c}
+  .below{display:grid;grid-template-columns:1fr auto;gap:24px;margin-top:18px;align-items:start}
+  @media (max-width:760px){.below{grid-template-columns:1fr}}
+  .legend{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 20px}
+  .legend li{display:flex;gap:8px;align-items:center;color:#c4cbd9}
+  .legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+  .controls{display:grid;gap:10px;min-width:260px}
+  .controls label{display:flex;gap:10px;align-items:center;color:#c4cbd9}
+  .controls input[type=range]{flex:1}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  button{font:inherit;color:#e4e8f2;background:#141b2b;border:1px solid #2c3850;border-radius:8px;padding:6px 14px;cursor:pointer}
+  button:hover{background:#1c2639}
+  button:disabled{color:#6b7488;cursor:default;background:#0d1220}
+  #modeNote{font-size:13px;color:#8590a6;margin:0;max-width:320px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>A tabletop solar system</h1>
+  <p class="sub">A sun, four planets and a moon, turning in front of a field of stars. On a 3D
+     display the orrery stands in the glass with the stars far behind it; move your head to look
+     around it.</p>
+  <div class="stage">
+    <canvas id="scene"></canvas>
+    <div id="cover"></div>
+  </div>
+  <div class="below">
+    <ul class="legend">
+      <li><i style="background:#ffc95a"></i>Sun</li>
+      <li><i style="background:#a59d94"></i>Cinder — fast inner world</li>
+      <li><i style="background:#3f7fd6"></i>Azure — with its moon</li>
+      <li><i style="background:#c4603a"></i>Rust</li>
+      <li><i style="background:#d9b27c"></i>Ringed giant</li>
+    </ul>
+    <div class="controls">
+      <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+      <label>Speed <input id="speed" type="range" min="0" max="2" step="0.05" value="1"></label>
+      <div class="row">
+        <button id="pause" type="button">Pause</button>
+        <button id="mode" type="button">Show in 2D</button>
+      </div>
+      <p id="modeNote"></p>
+    </div>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

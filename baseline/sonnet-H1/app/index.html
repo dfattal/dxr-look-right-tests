@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Globe — DisplayXR inline-3D</title>
+<style>
+  :root { color-scheme: dark; --bg:#05070d; --panel:#0e1422; --line:#24304a; --fg:#e8eefc; --dim:#8e9bb8; --accent:#ffb347; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+    font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased; }
+  .app { display:grid; grid-template-columns: 320px 1fr; height:100%; }
+  /* Sidebar is a sibling of the stage, never over the canvas. Solid backgrounds, no blur/filters. */
+  aside { background:var(--panel); border-right:1px solid var(--line); padding:22px 20px; display:flex; flex-direction:column; gap:18px; overflow:auto; }
+  h1 { font-size:22px; margin:0; letter-spacing:.02em; }
+  .sub { color:var(--dim); margin:4px 0 0; font-size:13px; }
+  .cities { display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none; }
+  .cities button { width:100%; text-align:left; font:inherit; color:var(--fg); background:#141c30; border:1px solid var(--line);
+    border-radius:8px; padding:9px 12px; cursor:pointer; display:flex; align-items:center; gap:10px; }
+  .cities button:hover, .cities button:focus-visible { border-color:var(--accent); outline:none; }
+  .cities button[aria-pressed="true"] { background:#2a2113; border-color:var(--accent); }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--accent); flex:none; }
+  #info { background:#141c30; border:1px solid var(--line); border-radius:10px; padding:14px 16px; min-height:128px; }
+  #info h2 { margin:0 0 2px; font-size:20px; }
+  #info .pop { font-size:30px; font-weight:650; color:var(--accent); font-variant-numeric:tabular-nums; margin:6px 0 0; }
+  #info .meta { color:var(--dim); font-size:13px; }
+  #info .hint { color:var(--dim); margin:0; }
+  .status { margin-top:auto; font-size:12px; color:var(--dim); }
+  .status b { color:#4ade80; font-weight:600; }
+  .stage { position:relative; min-width:0; min-height:0; }
+  /* The canvas must stay visually bare: no border/radius/shadow/filter/background (woven canvas rules). */
+  #globe { position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; cursor:grab; }
+  #globe.drag { cursor:grabbing; } #globe.hot { cursor:pointer; }
+  /* Opaque cover on TOP of the canvas until the first woven frame; removed with a hard cut. */
+  #cover { position:absolute; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; color:var(--dim); }
+  #tip { position:fixed; z-index:5; pointer-events:none; display:none; background:#0e1422; border:1px solid var(--accent);
+    color:var(--fg); padding:3px 9px; border-radius:6px; font-size:13px; white-space:nowrap; }
+  @media (max-width: 760px) { .app { grid-template-columns:1fr; grid-template-rows:auto 1fr; } aside { border-right:0; border-bottom:1px solid var(--line); max-height:48vh; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div>
+      <h1>Spin the Earth</h1>
+      <p class="sub">Drag to rotate. Click a marker or pick a city.</p>
+    </div>
+    <ul class="cities" id="cityList"></ul>
+    <div id="info" aria-live="polite"><p class="hint">Select a city to see its population.</p></div>
+    <div class="status" id="status">starting…</div>
+  </aside>
+  <main class="stage">
+    <canvas id="globe" aria-label="Interactive 3D globe"></canvas>
+    <div id="cover" hidden>Preparing 3D…</div>
+  </main>
+</div>
+<div id="tip"></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Globe — DisplayXR inline 3D</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the tile == the scene's clearColor (BG in app.js). */
+  html,body{margin:0;background:#101a33;color:#e8ecf6;font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 48px}
+  h1{font-size:26px;margin:0 0 2px}
+  .sub{color:#9aa6c4;margin:0 0 16px}
+  .layout{display:grid;grid-template-columns:minmax(0,800px) 300px;gap:24px;align-items:start}
+  @media (max-width:960px){.layout{grid-template-columns:1fr}}
+  /* Visually bare canvas: no border/radius/shadow/filter/opacity/animated transform on it, its
+     ancestors or anything over it. All text lives OUTSIDE the tile. */
+  .stage{position:relative}
+  #globe{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:grab;user-select:none}
+  #globe.dragging{cursor:grabbing}
+  #globe.hot{cursor:pointer}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#101a33}
+  .hint{color:#9aa6c4;font-size:13px;margin:8px 0 0}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#9aa6c4;margin:0 0 10px}
+  .panel{background:#18254a;border:1px solid #2c3d70;border-radius:10px;padding:16px 18px;min-height:120px}
+  .panel .name{font-size:24px;font-weight:650;margin:0}
+  .panel .pop{font-size:17px;margin:4px 0 0;color:#ffd08a}
+  .panel .meta{font-size:13px;color:#9aa6c4;margin:8px 0 0}
+  .cities{display:grid;gap:8px;margin:18px 0 0;padding:0;list-style:none}
+  button{font:inherit;color:#e8ecf6;border-radius:8px;cursor:pointer;background:#1c2b57;border:1px solid #3a4f8c;padding:7px 14px;text-align:left}
+  button:hover,button:focus-visible{background:#26396f}
+  button[aria-pressed="true"]{border-color:#ffb347;background:#2a3a6b}
+  .controls{margin-top:22px;display:grid;gap:10px}
+  .controls label{display:flex;gap:10px;align-items:center}
+  .controls input{flex:1}
+  #modeNote{font-size:13px;color:#9aa6c4;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Earth</h1>
+  <p class="sub">Drag to spin the globe. Click a city marker for details.</p>
+  <div class="layout">
+    <div>
+      <div class="stage">
+        <canvas id="globe" aria-label="Interactive 3D globe"></canvas>
+        <div id="cover"></div>
+      </div>
+      <p class="hint">Markers: London, Tokyo, New York, Sydney, Nairobi.</p>
+    </div>
+    <aside>
+      <h2>City</h2>
+      <div class="panel" id="info" aria-live="polite">
+        <p class="name">Select a city</p>
+        <p class="meta">Click an orange marker on the globe, or pick a city below.</p>
+      </div>
+      <ul class="cities" id="cities"></ul>
+      <div class="controls">
+        <h2>View</h2>
+        <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <button id="spin" type="button" aria-pressed="true">Auto-rotate: on</button>
+        <button id="mode" type="button">Show in 2D</button>
+        <p id="modeNote"></p>
+      </div>
+    </aside>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

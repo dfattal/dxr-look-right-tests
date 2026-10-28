@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room walk-through — DisplayXR inline 3D</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b0b0e; overflow: hidden;
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: #f0eee8; }
+  /* The canvas is visually bare (no border/radius/shadow/filter/opacity): the weave takes its
+     rect as a side-by-side pair, so any spatially varying CSS would be halved per eye. */
+  #stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
+    will-change: transform; touch-action: none; cursor: grab; }
+  #stage.dragging { cursor: grabbing; }
+  /* Opaque cover, ON TOP of the canvas, hard-cut (display:none) once the first woven frame lands. */
+  #cover { position: fixed; inset: 0; background: #0b0b0e; display: none; place-items: center;
+    z-index: 10; color: #cfcab9; letter-spacing: .04em; }
+  /* HUD: small partial regions, plain solid tint, no backdrop-filter. DOM sits on the glass
+     (zero disparity), so it stays panel-sharp and comfortable. */
+  .hud { position: fixed; z-index: 5; background: rgba(14, 14, 18, .88); border-radius: 8px;
+    padding: 10px 14px; pointer-events: none; font-size: 14px; }
+  #title { left: 16px; top: 16px; }
+  #title b { font-size: 16px; letter-spacing: .02em; }
+  #title span { display: block; opacity: .7; font-size: 13px; }
+  #help { left: 16px; bottom: 16px; }
+  #help kbd { display: inline-block; min-width: 1.2em; text-align: center; padding: 0 6px;
+    background: #2a2a32; border: 1px solid #4a4a56; border-radius: 4px; font: 12px ui-monospace, monospace; }
+  #status { right: 16px; top: 16px; font-size: 12px; opacity: .95; }
+  #status.woven b { color: #6fe39a; }
+  #status.flat b { color: #e6c07a; }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="cover">Entering 3D…</div>
+<div class="hud" id="title"><b>The Reading Room</b><span>a first-person walk-through</span></div>
+<div class="hud flat" id="status"><b>Detecting 3D…</b></div>
+<div class="hud" id="help">
+  <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk &nbsp;·&nbsp; drag mouse to look
+  &nbsp;·&nbsp; <kbd>←</kbd><kbd>→</kbd> turn &nbsp;·&nbsp; <kbd>Shift</kbd> faster
+  &nbsp;·&nbsp; <kbd>L</kbd> lock mouse
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

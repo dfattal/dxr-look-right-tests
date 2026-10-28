@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five Cities — a 3D globe</title>
+<style>
+  /* The page colour is ALSO the canvas's opaque clear colour (app.js PAGE_BG), so the 3D window
+     has no visible rectangle around the globe in 2D or on the panel. */
+  :root {
+    --bg: #04060c;
+    --ink: #e8eef8;
+    --muted: #93a1b8;
+    --line: #1c2536;
+    --card: #0c121e;
+    --accent: #ffb547;
+    --select: #ff6b7d;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 40px; }
+  header h1 { margin: 0; font-size: 28px; letter-spacing: .01em; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 28px;
+    align-items: start; margin-top: 22px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+  /* The stage holds ONLY the woven canvas and its load cover. Nothing else is ever drawn over
+     the canvas: the info panel lives in the side column, so the HTML text stays crisp 2D and
+     never sits on the glass in front of a globe that pops out of it. */
+  .stage { position: relative; width: min(100%, 76vh); margin: 0 auto; }
+  /* Bare canvas: no border, radius, shadow, filter, opacity or background (woven-canvas rule 7).
+     will-change from the first paint (rule 4). */
+  #globe { display: block; width: 100%; aspect-ratio: 1 / 1; will-change: transform;
+    cursor: grab; touch-action: none; }
+  #globe.dragging { cursor: grabbing; }
+  #globe.over-marker { cursor: pointer; }
+  /* Opaque cover on top of the canvas until the SDK says the tile is woven (rule 5). Cut, not
+     faded. */
+  .cover { position: absolute; inset: 0; background: var(--bg); display: grid;
+    place-items: center; color: var(--muted); font-size: 15px; }
+  .cover[hidden] { display: none; }
+  .status { text-align: center; color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .status b { color: var(--ink); font-weight: 600; }
+  .hint { text-align: center; color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  aside { display: flex; flex-direction: column; gap: 18px; }
+  .cities h2, .info h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+  .cities ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .cities button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+    font: inherit; text-align: left; cursor: pointer; }
+  .cities button:hover { border-color: #33415a; }
+  .cities button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cities button[aria-pressed="true"] { border-color: var(--select); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: none; }
+  [aria-pressed="true"] .dot { background: var(--select); }
+  .cities .country { margin-left: auto; color: var(--muted); font-size: 13px; }
+
+  .info { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px 20px; min-height: 196px; }
+  .info .empty { color: var(--muted); margin: 0; }
+  .info .name { font-size: 30px; font-weight: 700; margin: 0; line-height: 1.15; }
+  .info .country { color: var(--muted); margin: 2px 0 14px; }
+  .info dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
+  .info dt { color: var(--muted); font-size: 14px; }
+  .info dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .info .pop { font-size: 22px; font-weight: 650; color: var(--accent); }
+  .info .close { float: right; background: none; border: 1px solid var(--line); color: var(--muted);
+    border-radius: 8px; padding: 2px 9px; font: inherit; font-size: 13px; cursor: pointer; }
+  .info .close:hover { color: var(--ink); }
+  footer { margin-top: 28px; color: var(--muted); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Five Cities</h1>
+    <p>Drag the globe to spin it. Click a marker, or pick a city from the list, to see its details.</p>
+  </header>
+
+  <main>
+    <section aria-label="Globe">
+      <div class="stage">
+        <canvas id="globe" aria-label="Interactive globe with five city markers"></canvas>
+        <div class="cover" id="cover">Preparing the globe…</div>
+      </div>
+      <div class="status" id="status">&nbsp;</div>
+      <div class="hint">Drag to spin · scroll to zoom a little · Esc to close the panel</div>
+    </section>
+
+    <aside>
+      <nav class="cities" aria-label="Cities">
+        <h2>Cities</h2>
+        <ul id="cityList"></ul>
+      </nav>
+      <section class="info" id="info" aria-live="polite">
+        <h2>City</h2>
+        <p class="empty">Select a marker on the globe.</p>
+      </section>
+    </aside>
+  </main>
+
+  <footer>Populations are rounded figures from the most recent census or official estimate. Map shapes are simplified.</footer>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

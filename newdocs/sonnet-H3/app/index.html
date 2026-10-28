@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ring Runner — DisplayXR inline-3D flight game</title>
+<link rel="icon" href="data:,">
+<style>
+  html,body{margin:0;background:#0f141c;color:#e6e8ee;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 20px 40px}
+  h1{font-size:24px;margin:0 0 12px;letter-spacing:.02em}
+  /* No border/radius/shadow/filter/opacity/animated transform on or around the canvas (woven-canvas rules). */
+  .stage{position:relative}
+  #game{display:block;width:100%;aspect-ratio:16/9;touch-action:none;background:#bcd3e4}
+  /* HUD at the TOP, over sky: the sky is behind the glass. Plain rgba() backgrounds only. */
+  .hud{position:absolute;top:12px;padding:6px 14px;border-radius:6px;background:rgba(8,14,24,.6);
+       color:#fff;font-weight:600;letter-spacing:.06em;pointer-events:none}
+  #score{left:14px;font-size:22px}
+  #alt{right:14px;font-size:15px;font-variant-numeric:tabular-nums}
+  #score b{color:#ffd24a;font-size:26px;font-variant-numeric:tabular-nums}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#bcd3e4}
+  .bar{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:12px;color:#aab4c4;font-size:14px}
+  .bar label{display:flex;gap:8px;align-items:center}
+  button{font:inherit;color:#e6e8ee;background:#243046;border:1px solid #3a4a68;border-radius:6px;padding:4px 12px;cursor:pointer}
+  button:disabled,input:disabled{cursor:default;color:#6f7a8c}
+  kbd{background:#243046;border-radius:4px;padding:1px 6px}
+  #note{color:#8a97ab}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ring Runner</h1>
+  <div class="stage">
+    <canvas id="game"></canvas>
+    <div id="score" class="hud">RINGS <b id="n">0</b></div>
+    <div id="alt" class="hud">ALT 0 m</div>
+    <div id="cover"></div>
+  </div>
+  <div class="bar">
+    <span>Fly: <kbd>←</kbd> <kbd>→</kbd> steer · <kbd>↑</kbd> climb · <kbd>↓</kbd> dive. Fly through the golden rings.</span>
+    <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <button id="mode" type="button">Show in 2D</button>
+    <span id="note"></span>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./game.js"></script>
+</body>
+</html>

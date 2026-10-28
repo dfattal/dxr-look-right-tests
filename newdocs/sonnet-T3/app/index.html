@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A room to walk through — DisplayXR inline 3D</title>
+<link rel="icon" href="data:,">
+<style>
+  html,body{margin:0;background:#15171c;color:#e6e8ee;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px 20px 40px}
+  h1{font-size:24px;margin:0 0 2px}
+  p{color:#aab0bd;margin:0 0 14px}
+  /* No border/radius/shadow/filter/opacity/transform on or over the canvas (keeps it in the weave). */
+  .stage{position:relative}
+  #world{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:grab;background:#15171c}
+  /* HUD at the TOP only: the ceiling is behind the glass there; the floor at the bottom is nearest. */
+  #hud{position:absolute;top:10px;left:0;right:0;margin:0 auto;width:max-content;max-width:92%;padding:4px 12px;
+       border-radius:6px;background:rgba(10,12,16,0.62);color:#e6e8ee;font-size:13px;pointer-events:none}
+  #cover{position:absolute;inset:0;background:#15171c}
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:12px;font-size:14px;color:#c4c9d4}
+  .controls label{display:flex;gap:8px;align-items:center}
+  button{font:inherit;color:#e6e8ee;background:#262b36;border:1px solid #3a4150;border-radius:6px;padding:5px 12px;cursor:pointer}
+  button:disabled,input:disabled{color:#6c7280;cursor:not-allowed}
+  #note{color:#8a91a0;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>A room to walk through</h1>
+  <p>Walk with <b>W A S D</b> (or arrows) and look around with the mouse — drag, or press “Mouse look” to capture the pointer (Esc releases).</p>
+  <div class="stage">
+    <canvas id="world"></canvas>
+    <div id="hud">loading…</div>
+    <div id="cover"></div>
+  </div>
+  <div class="controls">
+    <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <button id="mode" type="button">Show in 2D</button>
+    <button id="lock" type="button">Mouse look</button>
+    <span id="note"></span>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

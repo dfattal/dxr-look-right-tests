@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ring Flyer — a little flight game for 3D displays</title>
+<link rel="icon" href="data:,">
+<style>
+  html,body{margin:0;height:100%;background:#11161f;color:#e8ecf3;
+            font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+  .wrap{display:flex;flex-direction:column;align-items:center;height:100%;box-sizing:border-box;padding:10px 12px}
+  header{width:100%;max-width:1600px;display:flex;align-items:baseline;gap:14px;margin:0 0 8px}
+  h1{font-size:20px;margin:0;letter-spacing:.02em}
+  header p{margin:0;color:#9aa4b5;font-size:14px}
+  /* A fixed 16:9 tile, as large as the window allows: the depth numbers in app.js are computed
+     for this aspect. The canvas and its ancestors are visually bare: no border, radius, shadow,
+     filter, opacity or animated transform (any of them can take the canvas out of the weave). */
+  .stage{position:relative;width:min(100%, calc((100vh - 112px) * 16 / 9));aspect-ratio:16/9}
+  #game{display:block;width:100%;height:100%;touch-action:none}
+  /* HUD at the TOP of the tile: there the picture is sky and far mountains, well behind the glass.
+     Never at the bottom (the terrain under the plane is the nearest edge-touching content).
+     Plain rgba() backgrounds only; no opacity, blur or filter. Text changes are hard cuts. */
+  .hud{position:absolute;top:12px;padding:5px 12px;border-radius:7px;background:rgba(8,14,24,0.62);
+       color:#f2f5fa;font-size:15px;pointer-events:none;white-space:nowrap}
+  #score{left:14px;font-weight:600;font-variant-numeric:tabular-nums}
+  #score b{color:#ffd24a;font-size:19px}
+  #help{left:0;right:0;margin:0 auto;width:max-content;font-size:13px;color:#d4dae6}
+  #best{right:14px;font-variant-numeric:tabular-nums;font-size:13px;color:#d4dae6}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#11161f;display:flex;align-items:center;justify-content:center;color:#7f8a9c}
+  .controls{width:100%;max-width:1600px;display:flex;align-items:center;gap:18px;margin-top:8px;font-size:14px;color:#c3cad6}
+  .controls label{display:flex;align-items:center;gap:8px}
+  .controls input{width:160px}
+  button{font:inherit;color:#e8ecf3;background:#232b38;border:1px solid #3a4558;border-radius:7px;padding:4px 12px;cursor:pointer}
+  button:disabled,input:disabled{cursor:default;color:#6d7686}
+  #modeNote{color:#8c96a8;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Ring Flyer</h1>
+    <p>Steer with the arrow keys (or WASD) and fly through the golden rings.</p>
+  </header>
+  <div class="stage">
+    <canvas id="game"></canvas>
+    <div class="hud" id="score">Rings <b id="rings">0</b> &nbsp;·&nbsp; missed <span id="missed">0</span></div>
+    <div class="hud" id="help">← → turn · ↑ climb · ↓ dive</div>
+    <div class="hud" id="best">best 0</div>
+    <div id="cover">loading…</div>
+  </div>
+  <div class="controls">
+    <label>3D depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <button id="mode" type="button">Show in 2D</button>
+    <span id="modeNote"></span>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

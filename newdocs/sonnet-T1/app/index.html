@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classic Rubber Duck — Product</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the tile == the model's clearColor (BG in app.js). */
+  html,body{margin:0;background:#e9e6df;color:#1d1f24;font:17px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 60px}
+  /* All 2D UI sits BESIDE the tile, never over it: the duck comes out of the glass. */
+  .product{display:grid;grid-template-columns:minmax(0,700px) minmax(280px,1fr);gap:40px;align-items:center}
+  @media (max-width:900px){.product{grid-template-columns:1fr}}
+  /* Visually bare canvas: no border/radius/shadow/filter/opacity/animated transform on it,
+     its ancestors or anything over it. */
+  .stage{position:relative}
+  #tile{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:grab}
+  #tile:active{cursor:grabbing}
+  /* Cover until loaded + woven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#e9e6df}
+  .hint{margin:10px 0 0;font-size:13px;color:#6a6458}
+  .kicker{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#6a6458;margin:0}
+  h1{font-size:38px;line-height:1.1;margin:6px 0 10px;letter-spacing:-.01em}
+  .price{font-size:28px;font-weight:700;margin:0 0 14px}
+  .desc{color:#3f424a;margin:0 0 22px}
+  ul.feat{margin:0 0 24px;padding-left:20px;color:#3f424a}
+  button{font:inherit;border-radius:8px;cursor:pointer}
+  button:focus-visible,input:focus-visible{outline:3px solid #2459c7;outline-offset:2px}
+  #buy{background:#1d1f24;color:#fff;border:0;padding:14px 30px;font-weight:600;font-size:18px}
+  #buy:hover{background:#000}
+  #cartNote{margin:10px 0 0;min-height:1.5em;font-size:14px;color:#2d6a3e}
+  .view{margin-top:26px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.14);display:grid;gap:10px}
+  .view label{display:flex;gap:10px;align-items:center;font-size:14px}
+  .view input{flex:1}
+  #mode{background:transparent;border:1px solid rgba(0,0,0,0.3);padding:6px 14px;justify-self:start;font-size:14px}
+  #modeNote{font-size:13px;color:#6a6458;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="product">
+    <div>
+      <div class="stage">
+        <canvas id="tile" aria-label="3D view of the rubber duck. Drag to rotate."></canvas>
+        <div id="cover"></div>
+      </div>
+      <p class="hint">Drag to rotate · scroll to zoom</p>
+    </div>
+    <div>
+      <p class="kicker">Bath collection</p>
+      <h1>Classic Rubber Duck</h1>
+      <p class="price">$12.00</p>
+      <p class="desc">The original bath-time companion, in sunshine yellow. Rotate it to see it from every side.</p>
+      <ul class="feat">
+        <li>Soft-touch, BPA-free vinyl</li>
+        <li>Floats upright, every time</li>
+        <li>Ships in 2 days</li>
+      </ul>
+      <button id="buy" type="button">Add to cart</button>
+      <p id="cartNote" role="status" aria-live="polite"></p>
+      <div class="view">
+        <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <button id="mode" type="button">Show in 2D</button>
+        <p id="modeNote"></p>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+  "playcanvas": "https://cdn.jsdelivr.net/npm/playcanvas@2.22.3/build/playcanvas.mjs",
+  "meshoptimizer/decoder": "https://cdn.jsdelivr.net/npm/meshoptimizer@1.2.0/meshopt_decoder.mjs",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js",
+  "@displayxr/inline3d/model": "../../sdk/js/inline3d-model-entry.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

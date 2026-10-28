@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly Sales by Region — 3D</title>
+<style>
+  :root { --bg: #0d111a; --fg: #e8ecf4; --dim: #98a2b8; color-scheme: dark; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 40px; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { margin: 0 0 18px; color: var(--dim); }
+
+  /* Legend: plain HTML above the tile, never over it. Solid colours, no backdrop-filter. */
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 0 0 16px; padding: 0; list-style: none; }
+  .legend li { display: flex; align-items: center; gap: 10px; }
+  .sw { width: 16px; height: 16px; border-radius: 4px; flex: none; }
+  .legend b { font-weight: 600; }
+  .legend span.t { color: var(--dim); font-size: 14px; }
+
+  /* The woven canvas stays visually bare: no border, radius, shadow, filter or opacity (they get
+     woven into the side-by-side pair). Its background matches the page so it reads borderless.
+     will-change from first paint, per woven-canvas rule 4. */
+  .stage { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--bg); }
+  #chart { display: block; width: 100%; height: 100%; will-change: transform; touch-action: none;
+    cursor: grab; }
+  #chart.drag { cursor: grabbing; }
+  /* Hard-cut cover (rule 5): opaque, on top, removed on firstWoven. Never faded. */
+  .cover { position: absolute; inset: 0; background: var(--bg); display: flex;
+    align-items: center; justify-content: center; color: var(--dim); }
+
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: 18px; }
+  .ctl { display: flex; align-items: center; gap: 12px; }
+  .ctl label { color: var(--dim); }
+  input[type=range] { width: 240px; accent-color: #4f9dff; }
+  output { min-width: 3.2em; font-variant-numeric: tabular-nums; }
+  button { font: inherit; font-weight: 600; color: var(--fg); background: #1c2740;
+    border: 1px solid #3a4a72; border-radius: 8px; padding: 8px 18px; cursor: pointer; }
+  button:hover:not(:disabled) { background: #26365c; }
+  button:disabled, input:disabled { opacity: .45; cursor: not-allowed; }
+  .status { margin: 14px 0 0; color: var(--dim); font-size: 14px; }
+  .status b { color: var(--fg); }
+  a { color: #7db4ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Quarterly Sales by Region</h1>
+  <p class="sub">Millions USD, Q1–Q4 · drag the chart to rotate it</p>
+
+  <ul class="legend" aria-label="Legend">
+    <li><span class="sw" style="background:#4f9dff"></span><b>North</b><span class="t">total 59M</span></li>
+    <li><span class="sw" style="background:#ffb347"></span><b>South</b><span class="t">total 45M</span></li>
+    <li><span class="sw" style="background:#5fd7a0"></span><b>West</b><span class="t">total 45M</span></li>
+  </ul>
+
+  <div class="stage">
+    <canvas id="chart" role="img"
+      aria-label="3D bar chart of quarterly sales in millions. North: 12, 15, 14, 18. South: 9, 11, 13, 12. West: 7, 10, 12, 16."></canvas>
+    <div class="cover" id="cover">Preparing chart…</div>
+  </div>
+
+  <div class="controls">
+    <div class="ctl">
+      <label for="strength">3D strength</label>
+      <input id="strength" type="range" min="0" max="100" step="1" value="100">
+      <output id="strengthOut" for="strength">100%</output>
+    </div>
+    <button id="modeBtn" type="button">Switch to 2D</button>
+  </div>
+  <p class="status" id="status">Detecting 3D display…</p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

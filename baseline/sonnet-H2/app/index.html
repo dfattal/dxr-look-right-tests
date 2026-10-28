@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk Aquarium - DisplayXR inline-3D</title>
+<style>
+  /* The page background and the renderer's clear colour are the SAME colour (#05090e), so the
+     opaque 3D window has no visible rectangle: it reads as the tank floating in the dark page. */
+  :root { --bg: #05090e; }
+  html, body { margin: 0; background: var(--bg); color: #cfe6ef;
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  header { text-align: center; padding: 14px 16px 6px; }
+  h1 { font-size: 20px; font-weight: 600; letter-spacing: .04em; margin: 0; color: #e8f6fb; }
+  .sub { margin: 2px 0 0; font-size: 13px; opacity: .65; }
+
+  /* Window size: 16:10, as large as fits the viewport. */
+  .stage { position: relative; width: min(96vw, calc((100vh - 118px) * 1.6)); aspect-ratio: 16 / 10; }
+  /* The canvas is kept VISUALLY BARE: no border/radius/shadow/filter/opacity (they would be woven
+     into the side-by-side pair and come out lopsided). will-change from first paint per
+     woven-canvas rule 4. */
+  #tank { display: block; width: 100%; height: 100%; will-change: transform; }
+  /* Rule 5: an opaque page-coloured cover ON TOP of the canvas until handle.firstWoven resolves,
+     then removed with a hard cut (never a fade). */
+  #cover { position: absolute; inset: 0; background: var(--bg); display: flex;
+    align-items: center; justify-content: center; font-size: 14px; color: #6fa3b5; }
+  #cover[hidden] { display: none; }
+
+  footer { padding: 6px 16px 14px; font-size: 13px; text-align: center; opacity: .75; }
+  footer b { color: #7ee0a4; font-weight: 600; }
+  footer a { color: #6cb8d6; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Desk Aquarium</h1>
+  <p class="sub">Five fish, a sandy floor, a few rocks and swaying plants.</p>
+</header>
+
+<div class="stage">
+  <canvas id="tank" width="1280" height="400"></canvas>
+  <div id="cover">Preparing the tank...</div>
+</div>
+
+<footer id="status">starting...</footer>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

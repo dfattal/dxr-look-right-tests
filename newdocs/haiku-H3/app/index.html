@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ring Run — DisplayXR inline-3D flight game</title>
+<link rel="icon" href="data:,">
+<style>
+  html,body{margin:0;background:#15171c;color:#e6e8ee;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:26px;margin:0 0 4px}
+  p{color:#aab0bd;margin:0 0 18px}
+  /* The canvas is visually bare: no border, radius, shadow, filter, opacity or animated transform on
+     it or on anything around or over it (they take it out of the weave or split it between eyes). */
+  .stage{position:relative}
+  #world{display:block;width:100%;aspect-ratio:16/9;touch-action:none}
+  /* HUD at the TOP: there the sky is behind the glass. The ground at the bottom edge is the nearest
+     thing in the frame, so no UI goes there. A plain rgba() background is fine; opacity, blur and
+     filters are not. */
+  #hud{position:absolute;top:10px;left:0;right:0;margin:0 auto;width:max-content;padding:4px 14px;
+       border-radius:6px;background:rgba(10,12,16,0.62);color:#ffd27a;font:600 15px/1.4 system-ui,sans-serif;
+       font-variant-numeric:tabular-nums;pointer-events:none}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#15171c}
+  .controls{display:flex;align-items:center;gap:16px;margin-top:14px;font-size:14px;color:#aab0bd}
+  .controls input{width:200px}
+  .controls button{font:inherit;color:#e6e8ee;background:#262a33;border:1px solid #3a4150;border-radius:6px;padding:4px 12px;cursor:pointer}
+  .controls button:disabled{opacity:.5;cursor:default}
+  #note{margin-top:10px;font-size:13px;min-height:1.6em}
+  a{color:#6aa8ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ring Run</h1>
+  <p>Fly through the gold rings. <kbd>←</kbd> <kbd>→</kbd> bank and turn · <kbd>↑</kbd> climb · <kbd>↓</kbd> dive.</p>
+  <div class="stage">
+    <canvas id="world"></canvas>
+    <div id="hud">Rings 0</div>
+    <div id="cover"></div>
+  </div>
+  <div class="controls">
+    <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <button id="mode" type="button">Show in 2D</button>
+  </div>
+  <p id="note">Depth: less on the slider = a shallower, more comfortable scene.</p>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+{
+  "name": "@displayxr/inline3d",
+  "version": "1.46.0",
+  "description": "Turn any HTML <canvas> into a 3D window on a spatial display, inside an ordinary web page, for the DisplayXR Browser. Dependency-free; progressive enhancement (falls back to plain 2D everywhere else).",
+  "type": "module",
+  "types": "./index.d.ts",
+  "main": "./js/inline3d.js",
+  "module": "./js/inline3d.js",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./js/inline3d.js"
+    },
+    "./three": {
+      "types": "./three.d.ts",
+      "import": "./js/inline3d-three.js"
+    },
+    "./cursor-depth": {
+      "types": "./cursor-depth.d.ts",
+      "import": "./js/inline3d-cursor-depth.js"
+    },
+    "./depth": {
+      "types": "./depth.d.ts",
+      "import": "./js/inline3d-depth-budget.js"
+    },
+    "./viewer": {
+      "types": "./viewer.d.ts",
+      "import": "./js/inline3d-viewer.js"
+    },
+    "./splat": {
+      "types": "./splat.d.ts",
+      "import": "./js/inline3d-splat.js"
+    },
+    "./splat/playcanvas": {
+      "types": "./splat-playcanvas.d.ts",
+      "import": "./js/inline3d-splat-pc-entry.js"
+    },
+    "./model": {
+      "types": "./model.d.ts",
+      "import": "./js/inline3d-model-entry.js"
+    },
+    "./model/three": {
+      "types": "./model.d.ts",
+      "import": "./js/inline3d-model.js"
+    },
+    "./package.json": "./package.json",
+    "./player": {
+      "types": "./player.d.ts",
+      "import": "./js/inline3d-player.js"
+    },
+    "./camera": {
+      "types": "./camera.d.ts",
+      "import": "./js/inline3d-camera.js"
+    },
+    "./call": {
+      "types": "./call.d.ts",
+      "import": "./js/inline3d-call.js"
+    },
+    "./call/full": {
+      "types": "./call-full.d.ts",
+      "import": "./js/inline3d-call-full.js"
+    },
+    "./undock": {
+      "types": "./index.d.ts",
+      "import": "./js/inline3d-undock.js"
+    }
+  },
+  "sideEffects": [
+    "./js/inline3d-call.js",
+    "./js/inline3d-call-full.js",
+    "./dist/*.js"
+  ],
+  "files": [
+    "llms.txt",
+    "docs/making-3d-look-right.md",
+    "docs/woven-canvas-rules.md",
+    "js/inline3d.js",
+    "js/inline3d-undock.js",
+    "js/inline3d-display-metrics.js",
+    "js/inline3d-depth-budget.js",
+    "js/inline3d-mode-switch.js",
+    "js/inline3d-buffer-limit.js",
+    "js/inline3d-viewer-ease.js",
+    "js/inline3d-three.js",
+    "js/inline3d-cursor-option.js",
+    "js/inline3d-cursor-depth.js",
+    "js/inline3d-cursor-depth-playcanvas.js",
+    "js/inline3d-cursor-perf.js",
+    "js/inline3d-cursor-bvh.js",
+    "js/inline3d-cursor-shape.js",
+    "js/vendor/",
+    "js/inline3d-viewer.js",
+    "js/inline3d-splat.js",
+    "js/inline3d-splat-pc-entry.js",
+    "js/inline3d-splat-deferred.js",
+    "js/inline3d-sog.js",
+    "js/inline3d-splat-perf.js",
+    "js/inline3d-splat-rig.js",
+    "js/inline3d-splat-playcanvas.js",
+    "js/inline3d-splat-shared.js",
+    "js/inline3d-splat-effects.js",
+    "js/inline3d-splat-live.js",
+    "js/inline3d-splat-diag.js",
+    "js/inline3d-splat-video.js",
+    "js/inline3d-splat-layer-rig.js",
+    "js/inline3d-splat-rig-map.js",
+    "js/inline3d-model.js",
+    "js/inline3d-model-entry.js",
+    "js/inline3d-model-playcanvas.js",
+    "js/inline3d-pc-look.js",
+    "js/inline3d-playcanvas-engine.js",
+    "js/inline3d-player.js",
+    "js/inline3d-camera.js",
+    "js/inline3d-call.js",
+    "js/inline3d-call-full.js",
+    "js/camera/",
+    "js/call/",
+    "js/lift/",
+    "dist/",
+    "index.d.ts",
+    "three.d.ts",
+    "depth.d.ts",
+    "cursor-depth.d.ts",
+    "viewer.d.ts",
+    "splat.d.ts",
+    "splat-playcanvas.d.ts",
+    "model.d.ts",
+    "player.d.ts",
+    "camera.d.ts",
+    "call.d.ts",
+    "call-full.d.ts",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "keywords": [
+    "displayxr",
+    "webxr",
+    "inline-3d",
+    "glasses-free-3d",
+    "spatial-display",
+    "stereo",
+    "3d-display",
+    "lightfield",
+    "three",
+    "playcanvas"
+  ],
+  "homepage": "https://displayxr.github.io/displayxr-web/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DisplayXR/displayxr-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DisplayXR/displayxr-browser/issues"
+  },
+  "license": "Apache-2.0",
+  "peerDependencies": {
+    "three": ">=0.150.0",
+    "@sparkjsdev/spark": ">=2.0.0",
+    "playcanvas": ">=2.22.3 <3",
+    "meshoptimizer": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    },
+    "@sparkjsdev/spark": {
+      "optional": true
+    },
+    "playcanvas": {
+      "optional": true
+    },
+    "meshoptimizer": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsc --noEmit -p tsconfig.json && node --test \"test/*.test.mjs\"",
+    "build:dist": "node tools/dist/build.mjs",
+    "vendor:bvh": "node tools/vendor/three-mesh-bvh.mjs",
+    "prepack": "node tools/dist/build.mjs",
+    "test:e2e": "node test/e2e/call-element.e2e.mjs",
+    "test:e2e:camera": "node test/e2e/camera.e2e.mjs",
+    "test:e2e:cursor": "node test/e2e/cursor-depth.e2e.mjs",
+    "test:e2e:cursor-perf": "node test/e2e/cursor-perf.e2e.mjs",
+    "test:e2e:samples-panel": "node test/e2e/samples-panel.e2e.mjs",
+    "api:check": "node tools/api-surface.mjs --check",
+    "api:update": "node tools/api-surface.mjs --update",
+    "check:snippets": "node tools/check-snippets.mjs",
+    "test:bundlers": "node test/bundlers/run.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/webxr": "^0.5.0",
+    "esbuild": "^0.25.0"
+  }
+}

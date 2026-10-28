@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hello-cube — DisplayXR inline-3D sample</title>
+<link rel="icon" href="data:,">
+<style>
+  /* One fixed page colour, and the scene clears to the SAME colour (BG in app.js), so the tile's
+     edge disappears into the page in 3D and in the 2D fallback alike. */
+  html,body{margin:0;background:#11141b;color:#e6e8ee;font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:36px 20px 72px}
+  a{color:#6aa8ff}
+  h1{font-size:28px;margin:0 0 4px}
+  .sub{color:#aab0bd;margin:0 0 26px}
+  /* The canvas stays VISUALLY BARE: no border, radius, shadow, filter or opacity. The weave splits
+     the element's rect down the middle, so anything drawn into the box is halved between the eyes,
+     and any render-surface CSS (filter, opacity < 1, …) takes it out of the weave. */
+  .stage{position:relative;max-width:640px;margin:22px auto 0}
+  #cube{display:block;width:100%;aspect-ratio:2/1}
+  /* Cover until handle.firstWoven: a plain block of the page colour ON TOP of the canvas, removed
+     in one step (never faded) so no raw side-by-side frame ever reaches the screen. */
+  #cover{position:absolute;inset:0;background:#11141b}
+  .badge{max-width:640px;margin:8px auto 0;font-size:13px;color:#aab0bd;text-align:center}
+  .cols{display:flex;gap:18px;flex-wrap:wrap;margin-top:26px}
+  .cols div{flex:1;min-width:220px}
+  h2{font-size:18px;margin:0 0 4px}
+  code{background:#ffffff14;padding:1px 5px;border-radius:4px}
+  .foot{margin-top:34px;font-size:14px;color:#aab0bd}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>hello-cube</h1>
+  <p class="sub">A glasses-free 3D element inside an ordinary web page — the DisplayXR inline-3D
+     "hello world".</p>
+
+  <p>Everything on this page is flat 2D HTML except the canvas: it requests an
+     <code>inline-3d</code> WebXR session, binds an <code>XRDisplayLayer</code>, and renders a
+     rotating cube once per eye, re-projected <b>off-axis from your eyes every frame</b>. In the
+     DisplayXR Browser on a DisplayXR display it weaves to glasses-free 3D and looks around as you
+     move; in any other browser it is a plain spinning cube.</p>
+
+  <div class="stage">
+    <canvas id="cube" width="1280" height="640"></canvas>
+    <div id="cover"></div>
+  </div>
+  <div class="badge" id="status">initializing…</div>
+
+  <div class="cols">
+    <div>
+      <h2>What to look for</h2>
+      <p>The cube sits just behind the glass and turns; its nearest corners come gently out of
+         it. The 2D text around it stays flat and crisp.</p>
+    </div>
+    <div>
+      <h2>How it works</h2>
+      <p>Plain WebGL into the canvas, one draw per eye with that eye's own view. Read
+         <a href="../../docs/making-3d-look-right.md">Making 3D that looks right</a> before you
+         start your own, then copy a <a href="../README.md">starter template</a>.</p>
+    </div>
+  </div>
+
+  <p class="foot">← <a href="../../">All samples</a> ·
+     <a href="https://github.com/DisplayXR/displayxr-browser">Get the DisplayXR Browser</a></p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../js/inline3d.js",
+  "@displayxr/inline3d/three": "../../js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

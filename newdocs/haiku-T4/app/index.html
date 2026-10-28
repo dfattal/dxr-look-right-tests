@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly sales by region — 3D bar chart</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the tile == the scene's clearColor (BG in app.js). */
+  html,body{margin:0;background:#f3f4f6;color:#1d2230;font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+  a{color:#2459c7}
+  h1{font-size:26px;margin:0 0 2px}
+  .sub{color:#5a6070;margin:0 0 18px}
+  /* Caption, tile and legend are all HTML OUTSIDE the tile: nothing over the 3D picture. */
+  .layout{display:grid;grid-template-columns:minmax(0,760px) 220px;gap:24px;align-items:start}
+  @media (max-width:900px){.layout{grid-template-columns:1fr}}
+  .caption{margin:0 0 6px;font-size:13px;color:#5a6070}
+  /* Visually bare canvas: no border/radius/shadow/filter/opacity/animated transform on it, its
+     ancestors or anything over it. */
+  .stage{position:relative}
+  #chart{display:block;width:100%;aspect-ratio:16/9}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#f3f4f6}
+  .legend{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .legend li{display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center}
+  .legend i{width:14px;height:14px;border-radius:3px;display:inline-block}
+  .legend .total{color:#5a6070;font-variant-numeric:tabular-nums}
+  aside h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#5a6070;margin:0 0 10px}
+  .controls{margin-top:28px;display:grid;gap:10px}
+  .controls label{display:flex;gap:10px;align-items:center}
+  .controls input{flex:1}
+  button{font:inherit;border-radius:8px;cursor:pointer;background:#fff;border:1px solid rgba(0,0,0,0.2);padding:6px 14px;justify-self:start}
+  button:disabled,input:disabled{opacity:.5;cursor:default}
+  #modeNote{font-size:13px;color:#5a6070;margin:0}
+  .foot{margin-top:28px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Quarterly sales by region</h1>
+  <p class="sub">Q1 to Q4 for North, South and West. On a 3D display the bars stand in the glass.</p>
+  <div class="layout">
+    <div>
+      <p class="caption">Sales, millions · bars run Q1 → Q4 left to right</p>
+      <div class="stage">
+        <canvas id="chart" role="img" aria-label="3D bar chart of quarterly sales for North, South and West, Q1 to Q4, in millions"></canvas>
+        <div id="cover"></div>
+      </div>
+    </div>
+    <aside>
+      <h2>Region</h2>
+      <ul class="legend" id="legend"></ul>
+      <div class="controls">
+        <h2>View</h2>
+        <label>3D strength <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <button id="mode" type="button" aria-pressed="false">Show in 2D</button>
+        <p id="modeNote"></p>
+      </div>
+    </aside>
+  </div>
+  <p class="foot">← <a href="../sdk/samples/starter-ui/index.html">starter-ui template</a> ·
+     <a href="../sdk/docs/making-3d-look-right.md">Making 3D that looks right</a></p>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

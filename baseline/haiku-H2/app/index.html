@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aquarium — DisplayXR inline-3D</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #0d1a22; color: #cfe3ea;
+    font: 15px/1.6 system-ui, -apple-system, Segoe UI, sans-serif; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 36px 20px 56px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: .02em; }
+  .sub { margin: 2px 0 18px; opacity: .6; font-size: 14px; }
+  a { color: #7ee2c3; }
+
+  /* THE 3D ELEMENT. Keep it bare: no border, radius, shadow, opacity, filter, mask or
+     backdrop-filter on the canvas or on any ancestor (woven-canvas rules 7 and 10). The tank's
+     own frame does the edging, and the canvas background matches the page so the window
+     dissolves into it. The stage is a plain positioned wrapper that only holds the cover. */
+  .stage { position: relative; }
+  #tank { display: block; width: 100%; aspect-ratio: 16 / 10; will-change: transform; }
+
+  /* Covers the canvas until handle.firstWoven resolves (woven-canvas rule 5). Opaque, on top,
+     hard cut via the hidden attribute. Its colour is the page colour, so it is invisible. */
+  .cover { position: absolute; inset: 0; background: #0d1a22; }
+  .cover[hidden] { display: none; }
+
+  .status { margin: 12px 0 0; font-size: 13px; opacity: .7; min-height: 1.6em; }
+  .status b { color: #7ee2c3; font-weight: 600; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Aquarium</h1>
+  <p class="sub">A glass tank on the desk: sand, rocks, swaying plants and five fish.</p>
+
+  <div class="stage">
+    <canvas id="tank" aria-label="Aquarium: five fish swimming in a glass tank"></canvas>
+    <div id="cover" class="cover"></div>
+  </div>
+
+  <p id="status" class="status">starting…</p>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./aquarium.js"></script>
+</body>
+</html>

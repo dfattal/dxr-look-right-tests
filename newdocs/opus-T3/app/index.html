@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A room to walk through — DisplayXR inline 3D</title>
+<link rel="icon" href="data:,">
+<style>
+  html,body{margin:0;background:#15171c;color:#e6e8ee;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1280px;margin:0 auto;padding:22px 20px 48px}
+  h1{font-size:24px;margin:0 0 2px;font-weight:600}
+  p{color:#aab0bd;margin:0 0 14px}
+  /* The canvas is visually bare: no border, radius, shadow, filter, opacity or transform on it,
+     on its ancestors, or on anything drawn over it (any of these can take it out of the weave). */
+  .stage{position:relative}
+  #world{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:crosshair;outline:none}
+  /* HUD at the TOP: there the ceiling is behind the glass. The floor at the bottom edge is the
+     nearest thing in a walk-through, so no UI goes there. Plain rgba() background only. */
+  #hud{position:absolute;top:10px;left:0;right:0;margin:0 auto;width:max-content;max-width:90%;
+       padding:3px 12px;border-radius:6px;background:rgba(10,12,16,0.66);color:#e6e8ee;
+       font-size:13px;pointer-events:none;text-align:center}
+  /* Cover until handle.firstWoven; removed in one step, never faded. */
+  #cover{position:absolute;inset:0;background:#15171c}
+  /* Controls live OUTSIDE the 3D tile, on the flat page. */
+  .controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;margin-top:14px;font-size:14px;color:#c6cad3}
+  .controls label{display:flex;align-items:center;gap:8px}
+  input[type=range]{width:180px;accent-color:#6aa8ff}
+  button{font:inherit;font-size:14px;color:#e6e8ee;background:#262a33;border:1px solid #3a404c;
+         border-radius:6px;padding:5px 14px;cursor:pointer}
+  button:hover{background:#2f3440}
+  button:disabled,input:disabled{cursor:default;color:#7a808c}
+  #modeNote{color:#8a909c}
+  kbd{font:12px ui-monospace,monospace;background:#262a33;border:1px solid #3a404c;border-radius:4px;padding:0 5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>A room to walk through</h1>
+  <p>Walk with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> (or the arrow keys, <kbd>Shift</kbd> to hurry).
+     Click the view to look around with the mouse (<kbd>Esc</kbd> to let go), or just drag.</p>
+  <div class="stage">
+    <canvas id="world" tabindex="0" aria-label="First-person view of a furnished room"></canvas>
+    <div id="hud">loading…</div>
+    <div id="cover"></div>
+  </div>
+  <div class="controls">
+    <label for="depth">Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <button id="mode" type="button" aria-pressed="false">Show in 2D</button>
+    <span id="modeNote"></span>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classic Rubber Duck — Product</title>
+<style>
+  /* Near-black page: a woven canvas that is "transparent" weaves black on the panel (known
+     browser limitation), so the page background is chosen to match it and the tile has no seam. */
+  :root { color-scheme: dark; --bg: #07080b; --fg: #f4f5f7; --muted: #aab0bc; --accent: #ffc83d; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .page { min-height: 100vh; max-width: 1200px; margin: 0 auto; padding: 32px 28px;
+    display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+  @media (max-width: 820px) { .page { grid-template-columns: 1fr; gap: 24px; } }
+
+  /* The stage holds the woven canvas. NOTHING decorative on the canvas or its ancestors:
+     no filter/opacity/radius/shadow/backdrop-filter (woven-canvas-rules 7, 10). */
+  .stage { position: relative; background: var(--bg); }
+  canvas#tile { display: block; width: 100%; aspect-ratio: 1 / 1; cursor: grab;
+    will-change: transform; /* from first paint, rule 4 */ touch-action: none; }
+  canvas#tile:active { cursor: grabbing; }
+  /* Opaque cover on TOP of the canvas until the first woven frame; hard cut, never a fade. */
+  .cover { position: absolute; inset: 0; background: var(--bg); display: grid; place-items: center;
+    color: var(--muted); font-size: 15px; }
+
+  .eyebrow { color: var(--accent); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; margin: 0 0 8px; }
+  h1 { font-size: clamp(34px, 4.4vw, 52px); line-height: 1.08; margin: 0 0 12px; font-weight: 800; }
+  .desc { color: var(--muted); margin: 0 0 24px; max-width: 34em; }
+  .price { font-size: 38px; font-weight: 800; font-variant-numeric: tabular-nums; margin: 0 0 24px; }
+  .price small { font-size: 16px; font-weight: 500; color: var(--muted); margin-left: 8px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  button { font: inherit; cursor: pointer; }
+  /* Solid colours only: no blur/translucent plates over the weave. */
+  .buy { background: var(--accent); color: #151100; border: 0; border-radius: 10px; padding: 15px 34px;
+    font-weight: 800; font-size: 18px; min-width: 200px; }
+  .buy:hover { background: #ffd666; }
+  .ghost { background: #14161c; color: var(--fg); border: 1px solid #3a4050; border-radius: 10px; padding: 11px 16px; font-size: 15px; }
+  .ghost:hover { background: #1d2029; }
+  button:focus-visible { outline: 3px solid #6aa8ff; outline-offset: 3px; }
+  .rotate { margin-top: 22px; }
+  .hint { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
+  .cart { margin-top: 22px; font-size: 15px; color: var(--muted); min-height: 1.5em; }
+  .cart b { color: var(--fg); }
+  .status { color: var(--muted); font-size: 13px; margin-top: 18px; min-height: 1.4em; }
+</style>
+</head>
+<body>
+<main class="page">
+  <section class="stage" aria-label="3D product view">
+    <!-- 2:1 backing store (side-by-side eyes) sized up front, as the sample does. -->
+    <canvas id="tile" width="1024" height="512" aria-label="Rubber duck, drag to rotate"></canvas>
+    <div class="cover" id="cover">Loading 3D model…</div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Bath &amp; Play</p>
+    <h1>Classic Rubber Duck</h1>
+    <p class="desc">Hand-finished, squeaky and impossibly cheerful. Drag the duck to turn it around and
+      look at it from every side.</p>
+    <p class="price">$12.99<small>free shipping</small></p>
+    <div class="row">
+      <button class="buy" id="add" type="button">Add to cart</button>
+    </div>
+    <div class="row rotate">
+      <button class="ghost" id="left" type="button" aria-label="Rotate left">◀ Rotate</button>
+      <button class="ghost" id="right" type="button" aria-label="Rotate right">Rotate ▶</button>
+      <button class="ghost" id="reset" type="button">Reset view</button>
+    </div>
+    <p class="hint">Drag to rotate · scroll or pinch to zoom</p>
+    <p class="cart" id="cart" aria-live="polite">Your cart is empty.</p>
+    <p class="status" id="status"></p>
+  </section>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js",
+  "@displayxr/inline3d/model": "../../sdk/js/inline3d-model-entry.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

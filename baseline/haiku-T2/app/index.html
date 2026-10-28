@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar system — DisplayXR inline-3D</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #05060b; color: #c9d3ea;
+               font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 28px 20px 48px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 2px; }
+  .sub { margin: 0 0 18px; opacity: .7; font-size: 14px; }
+
+  /* The 3D element is a BARE canvas: no border, radius, shadow or background. The weave splits
+     its rect into a side-by-side pair, so any spatially varying CSS would be woven and halved.
+     The page colour matches the scene's, and the scene feathers its own edges into it. */
+  .stage { position: relative; max-width: 960px; }
+  #scene { display: block; width: 100%; aspect-ratio: 16 / 9; }
+
+  /* Cover: an opaque block in the page colour, held over the canvas until handle.firstWoven
+     resolves (a hard cut, never a fade). Absolute, never fixed or sticky, so the SDK's auto
+     chrome scan does not register it as page chrome. */
+  .cover { position: absolute; inset: 0; background: #05060b; }
+
+  .status { margin-top: 12px; font-size: 13px; opacity: .7; min-height: 1.5em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Solar system</h1>
+  <p class="sub">Four planets and a moon around a sun that sits on the glass.</p>
+  <div class="stage">
+    <canvas id="scene" aria-label="Animated solar system"></canvas>
+    <div class="cover" id="cover"></div>
+  </div>
+  <div class="status" id="status">Starting…</div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Classic Duck — Bath collection</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the tile == the model's clearColor (BG in app.js). Change both together. */
+  :root{--bg:#ebe8e1;--ink:#1c1e23;--muted:#676255;--line:rgba(0,0,0,0.12);--accent:#1c1e23}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  button{font:inherit;cursor:pointer;color:inherit}
+  button:focus-visible{outline:2px solid #2459c7;outline-offset:2px}
+
+  header{display:flex;align-items:center;justify-content:space-between;max-width:1180px;margin:0 auto;padding:18px 24px}
+  .brand{font-weight:700;letter-spacing:.02em;font-size:18px}
+  .cart{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px}
+  .cart b{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:#fff;font-size:12px;padding:0 6px}
+
+  main{max-width:1180px;margin:0 auto;padding:8px 24px 56px}
+  /* The product's HTML sits BESIDE the tile, never over it: the model comes out of the glass and
+     2D UI over pop-out content is a depth conflict. Narrow screens stack it below. */
+  .product{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:center}
+  @media (max-width:900px){.product{grid-template-columns:1fr;gap:24px}}
+
+  /* Visually bare canvas: no border / radius / shadow / filter / opacity / animated transform on
+     the canvas, its ancestors, or anything over it (woven-canvas-rules §7). */
+  .stage{position:relative}
+  #tile{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:grab}
+  #tile:active{cursor:grabbing}
+  /* Cover until the model is framed AND the tile is woven; removed in one step, never faded. */
+  #cover{position:absolute;inset:0;background:var(--bg);display:grid;place-items:center;color:var(--muted);font-size:14px}
+  #cover[hidden]{display:none}
+
+  /* Controls live UNDER the tile, outside it. */
+  .under{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-top:12px}
+  .hint{font-size:13px;color:var(--muted);margin:0}
+  .turn{display:flex;gap:6px}
+  .turn button{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:14px;line-height:1.2}
+  .turn button:hover{background:#f6f5f2}
+
+  .kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+  h1{font-size:36px;line-height:1.1;margin:6px 0 10px;letter-spacing:-.01em}
+  .rating{font-size:14px;color:var(--muted);margin:0 0 14px}
+  .rating span{color:#b98a12;letter-spacing:2px}
+  .price{font-size:28px;font-weight:650;margin:0 0 4px}
+  .stock{font-size:13px;color:#2f7a45;margin:0 0 18px}
+  .desc{color:#45484f;margin:0 0 22px}
+  .buyrow{display:flex;gap:10px;align-items:stretch}
+  .qty{display:flex;align-items:center;border:1px solid rgba(0,0,0,0.2);border-radius:10px;background:#fff}
+  .qty button{border:0;background:transparent;width:36px;height:100%;font-size:18px}
+  .qty output{min-width:24px;text-align:center;font-weight:600}
+  #buy{flex:1;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:13px 22px;font-weight:650;font-size:16px}
+  #buy:hover{background:#33363d}
+  #buy.done{background:#2f7a45}
+  .perks{list-style:none;padding:0;margin:18px 0 0;font-size:13px;color:var(--muted);display:grid;gap:4px}
+
+  .view{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:10px}
+  .view h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:600}
+  .view label{display:flex;gap:10px;align-items:center;font-size:14px}
+  .view input{flex:1}
+  #mode{background:transparent;border:1px solid rgba(0,0,0,0.25);border-radius:8px;padding:6px 14px;justify-self:start;font-size:14px}
+  #modeNote{font-size:13px;color:var(--muted);margin:0}
+  footer{max-width:1180px;margin:0 auto;padding:0 24px 32px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Rubber &amp; Co.</div>
+  <div class="cart" aria-live="polite">Cart <b id="cartCount">0</b></div>
+</header>
+
+<main>
+  <div class="product">
+    <section aria-label="Product view">
+      <div class="stage">
+        <canvas id="tile" aria-label="3D view of the Classic Duck. Drag to rotate."></canvas>
+        <div id="cover">Loading the duck…</div>
+      </div>
+      <div class="under">
+        <p class="hint">Drag to rotate · scroll or pinch to look closer</p>
+        <div class="turn">
+          <button id="left" type="button" aria-label="Rotate left">⟲</button>
+          <button id="reset" type="button">Front</button>
+          <button id="right" type="button" aria-label="Rotate right">⟳</button>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Product details">
+      <p class="kicker">Bath collection</p>
+      <h1>The Classic Duck</h1>
+      <p class="rating"><span aria-hidden="true">★★★★★</span> 4.9 · 1,284 reviews</p>
+      <p class="price">$12.00</p>
+      <p class="stock">In stock — ships in 1–2 days</p>
+      <p class="desc">Hand-finished, BPA-free vinyl in a sunny yellow that won't fade.
+         Floats upright, squeaks on cue, and keeps the bath company for years.</p>
+      <div class="buyrow">
+        <div class="qty" role="group" aria-label="Quantity">
+          <button id="minus" type="button" aria-label="Fewer">−</button>
+          <output id="qty">1</output>
+          <button id="plus" type="button" aria-label="More">+</button>
+        </div>
+        <button id="buy" type="button">Add to cart</button>
+      </div>
+      <ul class="perks">
+        <li>Free shipping over $35</li>
+        <li>30-day returns</li>
+      </ul>
+      <div class="view">
+        <h2>3D view</h2>
+        <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <button id="mode" type="button">Show in 2D</button>
+        <p id="modeNote"></p>
+      </div>
+    </section>
+  </div>
+</main>
+<footer>Model: Duck (Draco variant) from the Khronos glTF Sample Assets, © Sony, CC0 1.0.</footer>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+  "playcanvas": "https://cdn.jsdelivr.net/npm/playcanvas@2.22.3/build/playcanvas.mjs",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js",
+  "@displayxr/inline3d/model": "../../sdk/js/inline3d-model-entry.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

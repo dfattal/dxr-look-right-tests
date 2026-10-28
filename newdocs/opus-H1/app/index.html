@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five cities — a 3D globe</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the canvas == the scene's clearColor (BG in app.js). */
+  html,body{margin:0;background:#070d1a;color:#e6e9f0;font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 20px 48px}
+  h1{font-size:26px;margin:0 0 2px;letter-spacing:.01em}
+  .sub{color:#9aa6bd;margin:0 0 18px}
+  /* Globe tile on the left, all text and controls in a column BESIDE it — never over the tile. */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;align-items:start}
+  @media (max-width:900px){.layout{grid-template-columns:1fr}}
+  /* Visually bare canvas: no border/radius/shadow/filter/opacity/animated transform on it, its
+     ancestors or anything over it (they can take it out of the weave). */
+  .stage{position:relative}
+  #globe{display:block;width:100%;aspect-ratio:16/9;cursor:grab}
+  #globe.dragging{cursor:grabbing}
+  #globe.over-marker{cursor:pointer}
+  /* Cover until handle.firstWoven, removed in one step (never faded). */
+  #cover{position:absolute;inset:0;background:#070d1a;display:flex;align-items:center;justify-content:center;color:#5d6a85;font-size:14px}
+  .hint{color:#7f8ba3;font-size:13px;margin:8px 0 0;text-align:center}
+  aside h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#7f8ba3;margin:0 0 10px;font-weight:600}
+  /* Info panel: plain rgba() background only. */
+  #info{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);border-radius:10px;padding:16px 18px;min-height:150px}
+  #info .empty{color:#8792a8;margin:0}
+  #info .city{font-size:24px;font-weight:650;margin:0;line-height:1.2}
+  #info .country{color:#9aa6bd;margin:0 0 12px}
+  #info dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}
+  #info dt{color:#8792a8}
+  #info dd{margin:0;font-variant-numeric:tabular-nums}
+  #info .pop{font-size:20px;font-weight:600;color:#ffc46b}
+  #info .note{font-size:12px;color:#6f7a90;margin:12px 0 0}
+  .cities{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+  .cities button{font:inherit;font-size:14px;color:#e6e9f0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:999px;padding:4px 12px;cursor:pointer}
+  .cities button[aria-pressed="true"]{background:#ffb347;border-color:#ffb347;color:#1a1206}
+  .controls{margin-top:26px;display:grid;gap:10px}
+  .controls label{display:flex;gap:10px;align-items:center}
+  .controls input{flex:1}
+  #mode{font:inherit;font-size:14px;color:#e6e9f0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:8px;padding:5px 14px;cursor:pointer;justify-self:start}
+  #mode:disabled,#depth:disabled{cursor:default}
+  #modeNote{font-size:13px;color:#7f8ba3;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Five cities</h1>
+  <p class="sub">Spin the globe and pick a city. On a 3D display the Earth floats in the screen.</p>
+  <div class="layout">
+    <div>
+      <div class="stage">
+        <canvas id="globe" tabindex="0" aria-label="3D globe. Drag or use the arrow keys to spin; click a marker to select a city."></canvas>
+        <div id="cover">Building the globe…</div>
+      </div>
+      <p class="hint">Drag to spin · click a marker · arrow keys work too</p>
+    </div>
+    <aside>
+      <h2>City</h2>
+      <div id="info" aria-live="polite"><p class="empty">Click one of the glowing markers on the globe, or choose a city below.</p></div>
+      <ul class="cities" id="cities"></ul>
+      <div class="controls">
+        <h2>View</h2>
+        <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <button id="mode" type="button">Show in 2D</button>
+        <p id="modeNote"></p>
+      </div>
+    </aside>
+  </div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

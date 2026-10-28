@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A room to walk through — DisplayXR inline-3D</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the canvas equals the scene's clear colour (BG in app.js). */
+  html,body{margin:0;background:#15171c;color:#e6e8ee;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:26px;margin:0 0 4px}
+  p{color:#aab0bd;margin:0 0 18px}
+  a{color:#6aa8ff}
+  /* The canvas is visually bare: no border/radius/shadow/filter/opacity/transform on it, on any
+     ancestor, or on anything over it. Those take it out of the weave or split it between eyes. */
+  .stage{position:relative}
+  #room{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:grab}
+  /* HUD at the TOP: there the ceiling is behind the glass. The floor at the bottom edge is the
+     nearest thing in a walk-through, so no UI goes there. Plain rgba() only: no opacity or blur. */
+  #hud{position:absolute;top:10px;left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100% - 24px);
+       padding:4px 12px;border-radius:6px;background:rgba(10,12,16,0.62);color:#e6e8ee;font-size:13px;
+       pointer-events:none;box-sizing:border-box}
+  /* Covers the canvas until handle.firstWoven; removed in one step, never faded. */
+  #cover{position:absolute;inset:0;background:#15171c}
+  /* Controls sit OUTSIDE the canvas, in plain HTML. */
+  .controls{margin-top:18px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+  .controls label{display:flex;gap:10px;align-items:center}
+  .controls input{width:180px}
+  button{font:inherit;border-radius:8px;cursor:pointer;background:#222631;color:#e6e8ee;
+         border:1px solid rgba(255,255,255,0.2);padding:6px 14px}
+  button:disabled,input:disabled{opacity:0.5;cursor:default}
+  #note{font-size:13px;color:#aab0bd;margin:0}
+  .help{font-size:14px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>A room to walk through</h1>
+  <p>A small furnished room with a window at the far end, seen from the inside. You stand about
+     1.6 m tall and walk through it on a 3D display; the room sits just behind the glass, like a
+     view through a window.</p>
+  <div class="stage">
+    <canvas id="room"></canvas>
+    <div id="hud">loading…</div>
+    <div id="cover"></div>
+  </div>
+  <div class="controls">
+    <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <button id="mode" type="button">Show in 2D</button>
+    <p id="note"></p>
+  </div>
+  <p class="help">Walk with <b>W A S D</b> or the arrow keys. Drag with the mouse to look around.
+     <a href="../../sdk/docs/making-3d-look-right.md">Making 3D that looks right</a></p>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

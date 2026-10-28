@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sky Rings — a glasses-free 3D flight game</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #000; color: #f3f6fb;
+    font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+  /* The woven canvas: visually BARE (no border / radius / shadow / filter / opacity — they would be
+     woven with the side-by-side pair and split down the middle), and promoted from its first paint
+     (woven-canvas rule 4). Black sits BEHIND it on <body>, never above it. */
+  #stage { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
+    will-change: transform; touch-action: none; }
+
+  /* HUD: small, partial-rect DOM plates over the canvas. DOM is drawn on the glass at native
+     resolution, so it is the crispest thing on a lenticular panel. Solid tints only — never
+     backdrop-filter (it reads the interlaced weave behind it). */
+  .hud { position: fixed; z-index: 2; pointer-events: none; background: rgba(10, 16, 28, 0.74);
+    border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px; }
+  #score { top: 16px; left: 16px; padding: 10px 16px; display: flex; gap: 22px; }
+  #score .k { font-size: 11px; letter-spacing: .12em; opacity: .7; text-transform: uppercase; }
+  #score .v { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  #score .v.gold { color: #ffd257; }
+  #status { top: 16px; right: 16px; padding: 7px 12px; font-size: 12.5px; }
+  #status b { font-weight: 600; }
+  #status.on b { color: #7ee2a4; }
+  #status.off b { color: #e6c07a; }
+  #help { bottom: 16px; left: 50%; transform: translateX(-50%); padding: 7px 14px; font-size: 13px;
+    white-space: nowrap; opacity: .92; }
+  kbd { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 4px;
+    padding: 0 5px; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  #msg { top: 84px; left: 50%; transform: translateX(-50%); padding: 8px 18px; font-size: 20px;
+    font-weight: 700; display: none; }
+  #msg.good { color: #ffd257; }
+  #msg.bad { color: #ff8a7a; }
+
+  /* Cover over the canvas until the browser has actually joined it to the weave
+     (handle.firstWoven) — otherwise the raw side-by-side pair can flash. Opaque, ON TOP, removed
+     with a hard cut (display:none), never faded. */
+  #cover { position: fixed; inset: 0; z-index: 5; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(#3d7cc9, #a9cdee 70%, #cfe3f3); color: #0d1b2e; }
+  #cover h1 { margin: 0; font-size: 54px; letter-spacing: .06em; color: #fff;
+    text-shadow: 0 2px 0 #2b5f9e; }
+  #cover p { margin: 0; font-size: 16px; opacity: .85; }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<div id="score" class="hud">
+  <div><div class="k">Rings</div><div class="v gold" id="vScore">0</div></div>
+  <div><div class="k">Streak</div><div class="v" id="vStreak">0</div></div>
+  <div><div class="k">Best</div><div class="v" id="vBest">0</div></div>
+</div>
+<div id="status" class="hud off"><b>Starting…</b></div>
+<div id="help" class="hud">
+  <kbd>←</kbd><kbd>→</kbd> bank &amp; turn · <kbd>↑</kbd> climb · <kbd>↓</kbd> dive ·
+  <kbd>P</kbd> pause · <kbd>R</kbd> restart<span id="depthHelp" style="display:none"> ·
+  <kbd>[</kbd><kbd>]</kbd> depth</span>
+</div>
+<div id="msg" class="hud"></div>
+
+<div id="cover">
+  <h1>SKY RINGS</h1>
+  <p id="coverText">Warming up the engine…</p>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+    "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+    "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+  }
+}
+</script>
+<script type="module" src="./game.js"></script>
+</body>
+</html>

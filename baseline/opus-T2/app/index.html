@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orrery — a tabletop solar system in glasses-free 3D</title>
+<style>
+  :root { color-scheme: dark; --bg: #04050a; --fg: #e8ecf6; --dim: #8d97b3; --accent: #ffb85c; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 22px 20px 40px; }
+  header h1 { margin: 0; font-size: 26px; font-weight: 650; letter-spacing: .01em; }
+  header h1 span { color: var(--accent); }
+  header p { margin: 2px 0 0; color: var(--dim); }
+
+  /* The woven tile. Rules from sdk/docs/woven-canvas-rules.md:
+     - the canvas stays visually BARE: no border, radius, shadow, filter, opacity, mask — the
+       scene feathers its own edges per eye (EdgeFeather) instead;
+     - will-change: transform from the very first paint (rule 4);
+     - the dark backdrop is on the page BEHIND the canvas, never above it (rule 9);
+     - fixed 16:9 box so the scene's framing (authored for a 0.24 m tall virtual display) holds. */
+  .stage { position: relative; margin: 18px auto 0;
+    width: min(100%, 1120px, calc(70vh * 16 / 9)); aspect-ratio: 16 / 9; }
+  #scene { display: block; width: 100%; height: 100%; will-change: transform;
+    cursor: grab; touch-action: none; }
+  #scene:active { cursor: grabbing; }
+
+  /* Opaque cover ON TOP of the canvas until handle.firstWoven resolves (rule 5): hides the raw
+     side-by-side pair while the compositor joins the canvas. Removed with a hard cut. */
+  #cover { position: absolute; inset: 0; background: var(--bg); display: grid; place-items: center;
+    color: var(--dim); font-size: 14px; letter-spacing: .04em; }
+
+  /* All UI lives OUTSIDE the woven rect: flat DOM at native resolution, zero disparity, crisp. */
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+    width: min(100%, 1120px, calc(70vh * 16 / 9)); margin: 14px auto 0; }
+  .group { display: flex; gap: 6px; align-items: center; }
+  .label { color: var(--dim); font-size: 13px; margin-right: 2px; }
+  button { font: inherit; font-size: 13px; color: var(--fg); background: #141826;
+    border: 1px solid #262c40; border-radius: 999px; padding: 5px 13px; cursor: pointer; }
+  button:hover { background: #1b2032; }
+  button[aria-pressed="true"] { background: #2a2216; border-color: #6b4e24; color: #ffd9a3; }
+  .status { margin-left: auto; font-size: 13px; color: var(--dim); }
+  .status b { color: #7ee2a8; font-weight: 600; }
+  .hint { width: min(100%, 1120px, calc(70vh * 16 / 9)); margin: 10px auto 0; font-size: 13px;
+    color: var(--dim); }
+  #tracking-hint { color: #ffd28a; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px;
+    width: min(100%, 1120px, calc(70vh * 16 / 9)); margin: 16px auto 0; font-size: 13px; color: var(--dim); }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    margin-right: 6px; vertical-align: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Orrery <span>·</span> a tabletop solar system</h1>
+    <p>A sun, four planets and a moon, set on the glass of your display in front of a deep starfield.</p>
+  </header>
+
+  <div class="stage">
+    <canvas id="scene" aria-label="Animated 3D solar system"></canvas>
+    <div id="cover">preparing the scene…</div>
+  </div>
+
+  <div class="bar">
+    <div class="group">
+      <button id="pause" aria-pressed="false">Pause</button>
+      <button id="reset">Reset view</button>
+    </div>
+    <div class="group" role="group" aria-label="Speed">
+      <span class="label">Speed</span>
+      <button data-speed="0.5">½×</button>
+      <button data-speed="1" aria-pressed="true">1×</button>
+      <button data-speed="3">3×</button>
+    </div>
+    <div class="status" id="status">starting…</div>
+  </div>
+  <div class="hint">Drag the scene to tilt the orbital plane. <span id="tracking-hint" hidden>
+    Step back in front of the display to see it in 3D.</span></div>
+
+  <div class="legend">
+    <span><i style="background:#ffb347"></i>Sun</span>
+    <span><i style="background:#c27b5a"></i>Ember</span>
+    <span><i style="background:#4f8fdc"></i>Azure &amp; its moon</span>
+    <span><i style="background:#d9b98a"></i>Sable (ringed)</span>
+    <span><i style="background:#8fd6e0"></i>Glacier</span>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

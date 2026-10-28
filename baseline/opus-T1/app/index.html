@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classic Rubber Duck — Quackworks</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0d0e11;
+    --panel: #15171c;
+    --line: #2a2d35;
+    --text: #f2f3f5;
+    --muted: #a3a8b3;
+    --accent: #ffc531;
+    --accent-ink: #1a1400;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+               font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+  /* Plain (non-sticky, non-fixed) header: nothing ever paints over the woven tile. */
+  header.site { display: flex; align-items: center; justify-content: space-between;
+                max-width: 1120px; margin: 0 auto; padding: 18px 24px; }
+  .brand { font-weight: 800; letter-spacing: .02em; font-size: 18px; }
+  .brand span { color: var(--accent); }
+  .cart { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted); }
+  .cart b { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 7px;
+            border-radius: 12px; background: var(--panel); border: 1px solid var(--line);
+            color: var(--text); font-size: 13px; font-variant-numeric: tabular-nums; }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 8px 24px 64px;
+         display: grid; gap: 40px; align-items: center;
+         grid-template-columns: minmax(0, 1.15fr) minmax(300px, 1fr); }
+  @media (max-width: 820px) { main { grid-template-columns: 1fr; gap: 24px; } }
+
+  /* ── the 3D stage ─────────────────────────────────────────────────────────────────────────
+     The black is UNDER the canvas (on this wrapper), never over it. The canvas clears to
+     transparent and a transparent woven pixel shows black on the panel, so a black stage makes
+     2D and 3D look the same. No filter/opacity/clip/radius on the canvas or any ancestor. */
+  .stage { background: #000; border-radius: 18px; padding: 14px; }
+  .tile-box { position: relative; width: 100%; max-width: min(560px, 68vh); margin: 0 auto; }
+  canvas#tile { display: block; width: 100%; aspect-ratio: 1 / 1;
+                will-change: transform; /* from first paint — woven-canvas rule 4 */
+                cursor: grab; touch-action: none; outline: none; }
+  canvas#tile:active { cursor: grabbing; }
+  /* Opaque cover until the model is loaded AND the tile is woven. Removed with a hard cut. */
+  .cover { position: absolute; inset: 0; background: #000; }
+
+  .controls { display: flex; justify-content: center; align-items: center; gap: 10px;
+              margin-top: 14px; flex-wrap: wrap; }
+  .controls button { font: inherit; font-size: 14px; color: var(--text); background: var(--panel);
+                     border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px;
+                     cursor: pointer; }
+  .controls button:hover { border-color: #444955; }
+  .controls button:focus-visible { outline: 2px solid var(--accent); }
+  /* Focus ring on the WRAPPER, outside the canvas: an outline on the canvas itself would be
+     woven with the side-by-side pair and split lopsided between the eyes. */
+  .tile-box:has(canvas:focus-visible) { outline: 2px solid var(--accent); outline-offset: 6px; }
+  .hint { text-align: center; color: var(--muted); font-size: 13px; margin: 10px 0 0; min-height: 1.5em; }
+
+  /* ── product info: ordinary DOM beside the tile, so it stays native-resolution 2D ────────── */
+  .eyebrow { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: .12em;
+             text-transform: uppercase; margin: 0 0 6px; }
+  h1 { font-size: clamp(30px, 4vw, 44px); line-height: 1.1; margin: 0 0 12px; letter-spacing: -.01em; }
+  .rating { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+  .rating .stars { color: var(--accent); letter-spacing: 2px; }
+  .price { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 0 0 4px; }
+  .price s { color: var(--muted); font-size: 18px; font-weight: 400; margin-left: 10px; }
+  .ship { color: var(--muted); font-size: 14px; margin: 0 0 22px; }
+  .desc { color: #d3d6dc; margin: 0 0 24px; max-width: 46ch; }
+
+  .buy { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
+  .qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 12px;
+         background: var(--panel); }
+  .qty button { font: inherit; font-size: 20px; width: 44px; height: 52px; background: none; border: 0;
+                color: var(--text); cursor: pointer; }
+  .qty output { min-width: 28px; text-align: center; font-variant-numeric: tabular-nums; }
+  .add { flex: 1 1 200px; font: inherit; font-size: 17px; font-weight: 700; height: 54px;
+         border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-ink);
+         cursor: pointer; }
+  .add:hover { background: #ffd35e; }
+  .add:active { background: #f0b81f; }
+  .add:focus-visible, .qty button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .added { color: #7ee2a4; font-size: 14px; margin: 12px 0 0; min-height: 1.5em; }
+
+  ul.facts { list-style: none; padding: 0; margin: 26px 0 0; border-top: 1px solid var(--line); }
+  ul.facts li { display: flex; justify-content: space-between; padding: 10px 0;
+                border-bottom: 1px solid var(--line); font-size: 14px; }
+  ul.facts li span:first-child { color: var(--muted); }
+
+  footer { max-width: 1120px; margin: 0 auto; padding: 0 24px 40px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="brand">Quack<span>works</span></div>
+  <div class="cart" aria-live="polite">Cart <b id="cartCount">0</b></div>
+</header>
+
+<main>
+  <section aria-label="3D product view">
+    <div class="stage">
+      <div class="tile-box">
+        <!-- 2:1 backing store from the start (the side-by-side pair of two square eyes). -->
+        <canvas id="tile" width="1024" height="512" tabindex="0"
+                aria-label="Classic Rubber Duck, 3D view. Drag or use the arrow keys to rotate."></canvas>
+        <div class="cover" id="cover" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button type="button" id="rotL" aria-label="Rotate left">⟲ Rotate</button>
+      <button type="button" id="reset">Reset view</button>
+      <button type="button" id="rotR" aria-label="Rotate right">Rotate ⟳</button>
+    </div>
+    <p class="hint" id="status">Loading 3D model…</p>
+  </section>
+
+  <section aria-labelledby="title">
+    <p class="eyebrow">Bath &amp; Play</p>
+    <h1 id="title">Classic Rubber Duck</h1>
+    <p class="rating"><span class="stars" aria-hidden="true">★★★★★</span> 4.9 · 1,284 reviews</p>
+    <p class="price">$14.99 <s aria-label="was $19.99">$19.99</s></p>
+    <p class="ship">Free shipping on orders over $35</p>
+    <p class="desc">The one that started it all. Hand-finished, BPA-free vinyl in sunshine yellow,
+      with a weighted base that keeps it upright through the stormiest bath.</p>
+
+    <div class="buy">
+      <div class="qty" role="group" aria-label="Quantity">
+        <button type="button" id="qtyDown" aria-label="Decrease quantity">−</button>
+        <output id="qty" aria-live="polite">1</output>
+        <button type="button" id="qtyUp" aria-label="Increase quantity">+</button>
+      </div>
+      <button type="button" class="add" id="addToCart">Add to cart</button>
+    </div>
+    <p class="added" id="added" aria-live="polite"></p>
+
+    <ul class="facts">
+      <li><span>Size</span><span>9 × 8 × 9 cm</span></li>
+      <li><span>Material</span><span>Natural-rubber blend</span></li>
+      <li><span>Ages</span><span>3+</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer>Duck model © Sony, CC0 1.0, via the Khronos glTF Sample Assets.</footer>
+
+<script type="importmap">
+{ "imports": {
+  "playcanvas": "https://cdn.jsdelivr.net/npm/playcanvas@2.22.3/build/playcanvas.mjs",
+  "meshoptimizer/decoder": "https://cdn.jsdelivr.net/npm/meshoptimizer@1.2.0/meshopt_decoder.mjs",
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js",
+  "@displayxr/inline3d/model": "../../sdk/js/inline3d-model-entry.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

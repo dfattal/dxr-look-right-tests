@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earth, five cities — DisplayXR inline-3D</title>
+<link rel="icon" href="data:,">
+<style>
+  /* The page colour behind the canvas == the globe's clearColor (BG in app.js). */
+  html,body{margin:0;background:#0b1220;color:#e6e8ee;font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:28px;line-height:1.2;margin:0 0 6px}
+  h2{font-size:24px;line-height:1.2;margin:0 0 6px}
+  p{color:#a9b4c8;margin:0 0 14px}
+  a{color:#6aa8ff}
+  /* The info panel sits BESIDE the globe, never over it: the globe's markers come out of the glass,
+     and 2D UI over pop-out content is a depth conflict. Narrow screens stack it below. */
+  .product{display:grid;grid-template-columns:minmax(0,680px) minmax(240px,1fr);gap:28px;align-items:start}
+  @media (max-width:860px){.product{grid-template-columns:1fr}}
+  /* Visually bare canvas: no border, radius, shadow, filter, opacity or animated transform on it,
+     its ancestors or anything over it. */
+  .stage{position:relative}
+  #globe{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:grab}
+  /* Cover until the first woven frame; removed in one step, never faded. */
+  #cover{position:absolute;inset:0;background:#0b1220}
+  .hint{font-size:13px;color:#7d8aa3;margin:10px 0 0}
+  .panel{display:grid;gap:18px}
+  #info{border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:16px 18px;background:#121b2e}
+  #info p{margin:0 0 4px}
+  #city-pop{color:#e6e8ee;font-size:18px}
+  #city-note{font-size:13px;color:#7d8aa3}
+  button{font:inherit;border-radius:8px;cursor:pointer}
+  button:focus-visible{outline:2px solid #6aa8ff;outline-offset:2px}
+  .cities{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .cities button{width:100%;text-align:left;background:transparent;color:#e6e8ee;border:1px solid rgba(255,255,255,0.18);padding:9px 14px}
+  .cities button[aria-pressed="true"]{border-color:#ffb84d;color:#ffb84d}
+  #clear{background:transparent;color:#a9b4c8;border:1px solid rgba(255,255,255,0.18);padding:5px 12px}
+  .view{border-top:1px solid rgba(255,255,255,0.12);padding-top:16px;display:grid;gap:10px}
+  .view label{display:flex;gap:10px;align-items:center;font-size:14px;color:#a9b4c8}
+  .view input{flex:1}
+  #mode{background:transparent;color:#e6e8ee;border:1px solid rgba(255,255,255,0.25);padding:6px 14px;justify-self:start}
+  #modeNote{font-size:13px;color:#7d8aa3;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>The Earth, five cities</h1>
+  <p>A globe you can spin. Click a marker to see the city and its population.</p>
+  <div class="product">
+    <div>
+      <div class="stage">
+        <canvas id="globe" role="img" aria-label="A 3D globe of the Earth with markers for London, Tokyo, New York, Sydney and Nairobi"></canvas>
+        <div id="cover"></div>
+      </div>
+      <p class="hint">Drag to spin · wheel to zoom · click a marker</p>
+    </div>
+    <aside class="panel">
+      <section id="info" aria-live="polite">
+        <h2 id="city-name">Pick a city</h2>
+        <p id="city-pop">Click a marker on the globe, or choose a city below.</p>
+        <p id="city-note"></p>
+        <button id="clear" type="button" hidden>Clear</button>
+      </section>
+      <ul class="cities">
+        <li><button type="button" data-city="london" aria-pressed="false">London</button></li>
+        <li><button type="button" data-city="tokyo" aria-pressed="false">Tokyo</button></li>
+        <li><button type="button" data-city="new-york" aria-pressed="false">New York</button></li>
+        <li><button type="button" data-city="sydney" aria-pressed="false">Sydney</button></li>
+        <li><button type="button" data-city="nairobi" aria-pressed="false">Nairobi</button></li>
+      </ul>
+      <div class="view">
+        <label>Depth <input id="depth" type="range" min="0" max="1" step="0.05" value="1"></label>
+        <button id="mode" type="button">Show in 2D</button>
+        <p id="modeNote"></p>
+      </div>
+    </aside>
+  </div>
+  <p style="margin-top:28px;font-size:14px">Globe and city data drawn in the page; populations are approximate.
+     ← <a href="../sdk/samples/README.md">SDK samples</a> ·
+     <a href="../sdk/docs/making-3d-look-right.md">Making 3D that looks right</a></p>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js",
+  "@displayxr/inline3d/cursor-depth": "../../sdk/js/inline3d-cursor-depth.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

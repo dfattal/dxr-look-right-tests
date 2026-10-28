@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earth: five cities · DisplayXR inline-3D</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #070b16;
+    --panel: #0e1628;
+    --line: rgba(255, 255, 255, .12);
+    --text: #e6edf7;
+    --muted: #9fb3c8;
+    --accent: #ffb703;
+  }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+               font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 10px; color: var(--muted); font-weight: 600;
+       text-transform: uppercase; letter-spacing: .06em; }
+  .sub { margin: 0 0 26px; color: var(--muted); }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+
+  /* THE GLOBE CANVAS STAYS BARE. The weave splits this rect into two eyes, so a border, radius,
+     shadow, filter, opacity or mask here (or on any ancestor) lands on one eye and is drawn
+     twice. The stage is a plain box and the canvas has no background. Its colour is painted in
+     the buffer (BG in app.js). */
+  .stage { position: relative; width: min(100%, 600px); margin: 0 auto; }
+  #globe { display: block; width: 100%; aspect-ratio: 1 / 1; will-change: transform; cursor: grab; }
+  #globe:active { cursor: grabbing; }
+  /* Covers the canvas until the browser has woven its first stereo frame. An opaque sibling on
+     top, cut away with `hidden`, never faded. It is not marked as an inline-3D overlay, because
+     it covers the whole tile. */
+  .poster { position: absolute; inset: 0; display: grid; place-items: center; background: var(--bg);
+            color: var(--muted); font-size: 14px; }
+  .poster[hidden] { display: none; }
+  .status { margin: 12px 0 0; font-size: 13px; color: var(--muted); min-height: 1.6em; text-align: center; }
+
+  /* The panel sits BESIDE the stage, never over it, so no overlay rules apply to it. */
+  aside { min-width: 0; }
+  .cities { display: grid; gap: 6px; margin-bottom: 22px; }
+  .city { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; width: 100%;
+          font: inherit; text-align: left; color: var(--text); background: transparent;
+          border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; }
+  .city span:last-child { font-size: 13px; color: var(--muted); }
+  .city[aria-pressed="true"] { border-color: var(--accent); background: rgba(255, 183, 3, .09); }
+  .city:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+  .info { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-height: 9em; }
+  .info h3 { margin: 0; font-size: 22px; }
+  .info .pop { margin: 10px 0 2px; font-size: 20px; font-weight: 600; color: var(--accent);
+               font-variant-numeric: tabular-nums; }
+  .info p { margin: 0; }
+  #detail[hidden], #hint[hidden] { display: none; }
+  #clear { margin-top: 14px; font: inherit; font-size: 14px; color: inherit; background: transparent;
+           border: 1px solid var(--line); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+  #clear:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+  .foot { margin-top: 34px; font-size: 13px; color: var(--muted); }
+  a { color: #7cb7ff; }
+
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Earth: five cities</h1>
+  <p class="sub">Drag the globe to spin it. Click a marker to see that city's population.</p>
+
+  <div class="layout">
+    <div>
+      <div class="stage">
+        <canvas id="globe" aria-label="A spinning globe with markers for London, Tokyo, New York, Sydney and Nairobi. Drag to spin, click a marker."></canvas>
+        <div class="poster" id="poster">Loading globe…</div>
+      </div>
+      <p class="status" id="status" role="status">Starting…</p>
+    </div>
+
+    <aside>
+      <h2>Cities</h2>
+      <div class="cities" id="cities" role="group" aria-label="Cities"></div>
+
+      <section class="info" id="info" aria-live="polite" aria-label="City details">
+        <p id="hint" class="muted">Click a marker on the globe, or choose a city above.</p>
+        <div id="detail" hidden>
+          <h3 id="cityName"></h3>
+          <p class="muted" id="cityCountry"></p>
+          <p class="pop"><span id="cityPop"></span> people</p>
+          <p class="muted small" id="cityBasis"></p>
+          <button type="button" id="clear">Clear selection</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <p class="foot">Population figures are approximate. Each one names its area and year, and city, metro and
+     urban-area numbers differ a lot. Land shapes are a rough hand-drawn outline, not a survey map.
+     Open in the <a href="https://github.com/DisplayXR/displayxr-browser">DisplayXR Browser</a> on a
+     DisplayXR display for glasses-free 3D; anywhere else it is a normal 2D page.</p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk Aquarium — DisplayXR inline 3D</title>
+<style>
+  /* Near-black page: a cleared/transparent woven pixel comes out black on the panel, so the page
+     matches it and the tile has no visible rectangle in either 3D or 2D. */
+  html, body { margin: 0; background: #030405; color: #cfd8dc; }
+  body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; min-height: 100vh;
+         display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  header { text-align: center; margin: 24px 16px 10px; }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: .04em; margin: 0; color: #e8f1f2; }
+  .sub { margin: 2px 0 0; font-size: 13px; opacity: .6; }
+
+  /* The woven canvas stays visually BARE: no border, radius, shadow, filter, opacity or
+     transform animation on it or on any ancestor (woven-canvas rules 7 and motion §1). */
+  .stage { position: relative; width: min(94vw, 980px, calc((100vh - 150px) * 1.6)); aspect-ratio: 16 / 10; }
+  #tank { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+  #tank.dragging { cursor: grabbing; }
+  /* Opaque cover ON TOP of the canvas until handle.firstWoven: never show the raw SBS pair.
+     Removed with a hard cut, never faded. Same colour as the page. */
+  #cover { position: absolute; inset: 0; background: #030405; }
+  #cover[hidden] { display: none; }
+
+  footer { text-align: center; margin: 10px 16px 24px; font-size: 13px; }
+  #status { opacity: .75; }
+  #status b { font-weight: 600; }
+  .hint { opacity: .45; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Desk Aquarium</h1>
+    <p class="sub">a small living tank, sitting just behind your screen</p>
+  </header>
+
+  <div class="stage">
+    <canvas id="tank" aria-label="An animated aquarium with five fish"></canvas>
+    <div id="cover" hidden></div>
+  </div>
+
+  <footer>
+    <div id="status">starting…</div>
+    <div class="hint">drag to turn the tank · click to drop some food</div>
+  </footer>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./aquarium.js"></script>
+</body>
+</html>
