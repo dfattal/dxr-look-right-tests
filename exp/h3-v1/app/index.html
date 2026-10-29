@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ring Runner — DisplayXR inline-3D</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #0b1220; color: #e5e7eb;
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 28px 20px 56px; }
+  h1 { font-size: 26px; margin: 0; }
+  .sub { margin: 2px 0 16px; opacity: .7; }
+
+  /* The HUD sits in the page flow ABOVE the canvas, never over it. Plain DOM: no backdrop-filter,
+     no shadow, nothing that spills outside its own box. */
+  .hud { display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+    padding: 8px 14px; background: #131d33; border-radius: 8px; }
+  .score { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .keys { font-size: 13px; opacity: .75; }
+
+  /* The 3D element. THE CANVAS STAYS VISUALLY BARE: no border, radius, background, shadow,
+     filter or opacity. The scene feathers its own edges into the page (EdgeFeather). The 2:1
+     backing store is sized in JS, and the CSS box stays 16:9. */
+  .stage { position: relative; margin-top: 14px; }
+  #game { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; will-change: transform; }
+
+  /* Cover: an opaque block over the canvas until handle.firstWoven settles. Cut it, never fade it. */
+  .cover { position: absolute; inset: 0; background: #0b1220; }
+
+  .badge { margin-top: 10px; font-size: 13px; opacity: .8; text-align: center; min-height: 1.5em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ring Runner</h1>
+  <p class="sub">Fly through the rings. Glasses-free 3D with the DisplayXR inline-3D SDK; a flat game everywhere else.</p>
+
+  <div class="hud">
+    <div>Rings <span class="score" id="score">0</span></div>
+    <div class="keys">← → steer &nbsp;·&nbsp; ↑ ↓ climb and dive</div>
+  </div>
+
+  <div class="stage">
+    <canvas id="game" aria-label="Ring Runner: a plane flying over rolling hills toward rings"></canvas>
+    <div class="cover" id="cover"></div>
+  </div>
+
+  <div class="badge" id="status">starting…</div>
+  <div class="badge" id="hint" hidden>Nobody is being tracked: move back into the display's 3D zone</div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./game.js"></script>
+</body>
+</html>

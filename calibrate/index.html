@@ -81,6 +81,7 @@ const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshSta
 scene.add(backdrop);
 
 const ui = Object.fromEntries(['crate', 'size', 'back', 'edge', 'spin', 'cv', 'sv', 'bv', 'read', 'status'].map((id) => [id, document.getElementById(id)]));
+let metrics = null;   // the tile's displayMetrics(), once the session is up
 const pct = (d) => (10 * d * (9 / 16)).toFixed(2);
 function apply() {
   const c = +ui.crate.value, s = +ui.size.value, b = +ui.back.value;
@@ -93,7 +94,23 @@ function apply() {
   ui.cv.textContent = c.toFixed(2) + ' h'; ui.sv.textContent = s.toFixed(2) + ' h'; ui.bv.textContent = b.toFixed(1) + ' h';
   const front = c + s / 2 * (ui.spin.checked ? Math.SQRT2 : 1);
   ui.read.innerHTML = `crate front ≈ ${front.toFixed(2)} h (≈ ${pct(Math.max(front, 0))} % in front)<br>` +
-    `backdrop ≈ ${b.toFixed(1)} h behind (≈ ${pct(b)} %, small-depth approximation)`;
+    `backdrop ≈ ${b.toFixed(1)} h behind (≈ ${pct(b)} %, small-depth approximation)` + physical(Math.max(front, 0), b);
+}
+// Physical readout (needs the DisplayXR Browser): the canvas's size on the panel and the nominal
+// viewer distance, so a reading is comparable across canvases, panels and distances. Comfort is set
+// in diopters: ΔD = 1/V − 1/z, on-screen disparity = e · V · ΔD.
+function physical(frontH, backH) {
+  if (!metrics || !(metrics.canvasSizeM[1] > 0)) return '';
+  const [W, H] = metrics.canvasSizeM, V = metrics.nominalViewerM, e = metrics.eyeSeparationM;
+  const zf = V - frontH * H, zb = V + backH * H;
+  const dF = zf > 0 ? 1 / zf - 1 / V : Infinity, dB = 1 / V - 1 / zb;
+  const mm = (d) => (e * V * d * 1000).toFixed(1);
+  return `<br><b>physical</b>: canvas ${(W * 1000).toFixed(0)} × ${(H * 1000).toFixed(0)} mm, viewer ${(V * 100).toFixed(0)} cm` +
+    ` (${metrics.source.size}/${metrics.source.viewer})<br>` +
+    `crate front: ${(frontH * H * 100).toFixed(1)} cm out, ${mm(dF)} mm on the glass, ${dF.toFixed(2)} D<br>` +
+    `backdrop: ${(backH * H * 100).toFixed(1)} cm behind, ${mm(dB)} mm on the glass, ${dB.toFixed(2)} D<br>` +
+    `<small>Percival ±0.33 D; Shibata at this distance ${(((1 / V) / 1.035 + 0.626) - 1 / V).toFixed(2)} D in front, ` +
+    `${(1 / V - ((1 / V) / 1.129 - 0.442)).toFixed(2)} D behind</small>`;
 }
 for (const id of ['crate', 'size', 'back', 'edge', 'spin']) ui[id].addEventListener('input', apply);
 apply();
@@ -129,7 +146,9 @@ const wall = await createInline3D({ lazy: false });
 if (wall.supported) {
   size(true);
   wall.session.updateRenderState({ depthNear: 0.01, depthFar: 50 });
-  wall.addScene(canvas, onFrame, { virtualDisplayHeight: VDH, onResize: () => size(true) });
+  const handle = wall.addScene(canvas, onFrame, { virtualDisplayHeight: VDH, onResize: () => { size(true); readMetrics(); } });
+  async function readMetrics() { try { metrics = await handle.displayMetrics(); apply(); } catch { /* stays as % only */ } }
+  setTimeout(readMetrics, 800);
   ui.status.textContent = 'inline-3D active';
 } else {
   size(false);
