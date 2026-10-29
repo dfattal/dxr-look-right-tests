@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly sales by region — 3D bar chart</title>
+<style>
+  :root { color-scheme: dark; }
+  /* Dark grey, never black: the page and the scene background are the same grey, so the
+     canvas edges disappear into the page. */
+  html, body { margin: 0; background: #1f2229; color: #e7e9ef;
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 28px 20px 48px; }
+  h1 { margin: 0 0 4px; font-size: 26px; font-weight: 650; }
+  .sub { margin: 0 0 18px; color: #a2aabb; font-size: 14px; }
+
+  /* THE STAGE HOLDS ONLY THE WOVEN CANVAS AND ITS COVER. Nothing on the canvas or on any ancestor
+     has a border, radius, shadow, opacity, filter, mask or backdrop: the weave takes the element's
+     rect as a side-by-side pair, so any of those is woven in and comes out lopsided. The legend,
+     controls and table sit OUTSIDE the stage, so no page chrome overlaps the woven picture.
+     will-change from first paint keeps a fresh canvas from being a one-frame-late promotion. */
+  .stage { position: relative; }
+  #chart { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; will-change: transform; }
+  /* The cover sits ON TOP of the canvas and is removed on handle.firstWoven (or on a timeout). */
+  .cover { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: #1f2229; color: #a2aabb; font-size: 14px; }
+  .cover[hidden] { display: none; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; list-style: none; margin: 16px 0 0; padding: 0; font-size: 15px; }
+  .legend li { display: flex; align-items: center; gap: 8px; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; flex: none; }
+
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin: 16px 0 0; }
+  button { font: inherit; color: inherit; background: #2c323e; border: 1px solid #434b5c;
+    border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+  button:hover { background: #343b49; }
+  button:focus-visible, input:focus-visible { outline: 2px solid #7aa7ff; outline-offset: 2px; }
+  .strength { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+  .strength input { width: 220px; accent-color: #7aa7ff; }
+  .strength output { min-width: 3.5em; font-variant-numeric: tabular-nums; color: #c9cfdc; }
+  .status { min-height: 1.5em; margin: 12px 0 0; font-size: 14px; color: #a2aabb; }
+
+  table { width: 100%; max-width: 520px; margin-top: 22px; border-collapse: collapse;
+    font-variant-numeric: tabular-nums; font-size: 15px; }
+  th, td { padding: 6px 10px; text-align: right; border-bottom: 1px solid #343a47; }
+  th:first-child { text-align: left; }
+  th[scope="row"] { font-weight: 500; }
+  caption { caption-side: bottom; text-align: left; margin-top: 6px; color: #a2aabb; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Quarterly sales by region</h1>
+  <p class="sub">Sales in millions, Q1–Q4. Each quarter has three bars, one per region. North stands
+     nearest the glass, West furthest back.</p>
+
+  <div class="stage">
+    <canvas id="chart" role="img"
+      aria-label="3D bar chart of quarterly sales for North, South and West, Q1 to Q4, in millions"></canvas>
+    <div class="cover" id="cover">Loading the 3D chart…</div>
+  </div>
+
+  <ul class="legend" id="legend" aria-label="Legend"></ul>
+
+  <div class="controls">
+    <button type="button" id="mode" aria-pressed="false">Switch to 2D</button>
+    <label class="strength" for="strength">3D strength
+      <input id="strength" type="range" min="0" max="100" step="5" value="100" disabled>
+      <output id="strengthOut" for="strength">100%</output>
+    </label>
+  </div>
+  <p class="status" id="status" role="status" aria-live="polite">Starting…</p>
+
+  <table id="data"></table>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

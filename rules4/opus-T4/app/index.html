@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly sales by region — 3D bar chart</title>
+<style>
+  /* Dark GREY, never pure black: the panel's crosstalk correction cannot go below black, so
+     bright bars on #000 double first. The scene clears to this same colour, so the tile's edge
+     disappears into the page. */
+  :root {
+    --bg: #1c2029;
+    --panel: #252a35;
+    --text: #e6e9ef;
+    --muted: #9aa3b2;
+    --accent: #6ea8fe;
+    --north: #4e9cf5;
+    --south: #f5a524;
+    --west: #3ecf8e;
+  }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 40px; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 4px; font-weight: 650; letter-spacing: -0.01em; }
+  .sub { margin: 0 0 16px; color: var(--muted); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 14px; padding: 0; list-style: none; }
+  .legend li { display: flex; align-items: center; gap: 8px; font-weight: 550; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .legend .tot { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+  /* The woven tile. Rules from docs/woven-canvas-rules.md:
+     - the canvas stays visually BARE (no border, radius, shadow, filter, opacity) — anything here
+       is woven into the side-by-side pair and split down the middle;
+     - will-change: transform from its first paint (rule 4), before the SDK registers it;
+     - no ancestor with filter/opacity/mask/clip-path (rule 7). */
+  .stage { position: relative; }
+  #chart { display: block; width: 100%; aspect-ratio: 16 / 9; will-change: transform;
+    touch-action: none; cursor: grab; }
+  #chart:active { cursor: grabbing; }
+  /* Cover until the first woven frame (rule 5). On top of the canvas, opaque, removed with a hard
+     cut — never faded. Always comes off: on firstWoven, on a timeout, or on any error. */
+  .cover { position: absolute; inset: 0; background: var(--bg); display: flex;
+    align-items: center; justify-content: center; color: var(--muted); font-size: 14px; }
+  .cover[hidden] { display: none; }
+
+  /* Controls live BELOW the tile, never over it: plain 2D, crisp on every browser generation,
+     nothing to exclude from the weave, no backdrop-filter anywhere. */
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px;
+    margin-top: 14px; padding: 12px 16px; background: var(--panel); border-radius: 10px; }
+  .depth { display: flex; align-items: center; gap: 12px; flex: 1 1 320px; }
+  .depth label { font-weight: 550; white-space: nowrap; }
+  .depth input { flex: 1; accent-color: var(--accent); min-width: 120px; }
+  .depth output { width: 3.5em; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  button { font: inherit; font-weight: 600; color: var(--text); background: #343b49;
+    border: 1px solid #485165; border-radius: 8px; padding: 7px 16px; cursor: pointer; min-width: 9.5em; }
+  button:hover:not(:disabled) { background: #3d4555; }
+  button:disabled, input:disabled { opacity: .5; cursor: not-allowed; }
+  .depth:has(input:disabled) label { color: var(--muted); }
+  .status { margin: 10px 2px 0; font-size: 13.5px; color: var(--muted); min-height: 1.5em; }
+  .status b { color: var(--text); font-weight: 600; }
+  .hint { color: #f5c26b; }
+  .note { margin-top: 18px; font-size: 13px; color: var(--muted); }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Quarterly Sales by Region</h1>
+  <p class="sub">Fiscal year, Q1–Q4 · revenue in millions of dollars ($M)</p>
+
+  <ul class="legend" aria-label="Legend">
+    <li><span class="sw" style="background:var(--north)"></span>North <span class="tot">$59M</span></li>
+    <li><span class="sw" style="background:var(--south)"></span>South <span class="tot">$45M</span></li>
+    <li><span class="sw" style="background:var(--west)"></span>West <span class="tot">$45M</span></li>
+  </ul>
+
+  <div class="stage">
+    <canvas id="chart" aria-label="3D bar chart of quarterly sales by region" role="img"></canvas>
+    <div class="cover" id="cover">Preparing chart…</div>
+  </div>
+
+  <div class="controls">
+    <div class="depth">
+      <label for="strength">3D depth</label>
+      <input id="strength" type="range" min="0" max="100" step="1" value="100" disabled>
+      <output id="strengthOut" for="strength">100%</output>
+    </div>
+    <button id="mode" type="button" disabled>Switch to 2D</button>
+  </div>
+  <p class="status" id="status" aria-live="polite">Starting…</p>
+  <p class="note">Drag the chart to tilt it · double-click to reset the view.</p>
+
+  <table class="sr-only">
+    <caption>Quarterly sales in millions of dollars</caption>
+    <thead><tr><th>Region</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr></thead>
+    <tbody>
+      <tr><th>North</th><td>12</td><td>15</td><td>14</td><td>18</td></tr>
+      <tr><th>South</th><td>9</td><td>11</td><td>13</td><td>12</td></tr>
+      <tr><th>West</th><td>7</td><td>10</td><td>12</td><td>16</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

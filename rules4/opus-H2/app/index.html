@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk Aquarium — DisplayXR inline 3D</title>
+<style>
+  /* Flat dark grey everywhere around and behind the canvas: never pure black (crosstalk
+     correction cannot go below black), and never a gradient behind the canvas (the canvas is
+     transparent, and whatever sits behind it is woven into the side-by-side pair). */
+  :root { color-scheme: dark; --bg: #1f2227; --fg: #e6e9ee; --dim: #9aa3ae; --accent: #f0a04b; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 48px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: 26px; font-weight: 650; margin: 0; letter-spacing: .2px; }
+  .sub { color: var(--dim); margin: 2px 0 0; }
+  .chip { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: #2c3139; color: var(--dim); white-space: nowrap; }
+  .chip.on { background: #213a2c; color: #9fe0b5; }
+
+  /* The 3D window. It must stay visually bare: no border, radius, shadow, filter or background.
+     The scene draws its own soft edges per eye (EdgeFeather). */
+  .stage { position: relative; margin: 20px auto 0; width: 100%; max-width: 940px; aspect-ratio: 16 / 10; }
+  #tank { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+  #tank:active { cursor: grabbing; }
+  /* Cover: an opaque block of the page colour ON TOP of the canvas until the first woven frame,
+     so the raw side-by-side pair never shows. A hard cut (no fade), and it always comes off. */
+  #cover { position: absolute; inset: 0; background: var(--bg); display: grid; place-items: center;
+    color: var(--dim); font-size: 14px; }
+  #cover[hidden] { display: none; }
+
+  .bar { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+  button { font: inherit; font-size: 14px; color: var(--fg); background: #2f343c; border: 1px solid #3c434d;
+    border-radius: 8px; padding: 7px 16px; cursor: pointer; }
+  button:hover { background: #373d46; }
+  button.primary { background: #4a3520; border-color: #6b4b2a; color: #ffd9ad; }
+  button.primary:hover { background: #57402a; }
+  .hint { text-align: center; color: var(--dim); font-size: 13px; margin-top: 10px; }
+  kbd { font: 12px ui-monospace, monospace; background: #2c3139; border-radius: 4px; padding: 1px 5px; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+    "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+    "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+  }
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Desk Aquarium</h1>
+      <p class="sub">A small planted tank with five residents, a living ornament for your desk.</p>
+    </div>
+    <span class="chip" id="mode">starting…</span>
+  </header>
+
+  <div class="stage">
+    <canvas id="tank" aria-label="A 3D aquarium with five fish, drag to turn it"></canvas>
+    <div id="cover">filling the tank…</div>
+  </div>
+
+  <div class="bar">
+    <button class="primary" id="feed">Feed the fish</button>
+    <button id="reset">Reset view</button>
+  </div>
+  <p class="hint">Drag to turn the tank · <kbd>F</kbd> to feed</p>
+</div>
+
+<script type="module" src="./aquarium.js"></script>
+</body>
+</html>

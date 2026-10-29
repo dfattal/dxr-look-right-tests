@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skyhopper — a small 3D flight game</title>
+<style>
+  :root { color-scheme: dark; }
+  /* Dark grey, never pure black, around and under the woven canvas (crosstalk can't go below black). */
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2129; color: #eef1f6;
+               font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; user-select: none; }
+
+  /* The woven canvas is VISUALLY BARE: no border, radius, shadow, filter, opacity or transform
+     animation on it or its ancestors. will-change from the first paint (woven-canvas rule 4). */
+  #stage { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;
+           will-change: transform; outline: none; }
+
+  /* Cover over the canvas until handle.firstWoven (rule 5). Removed with a hard cut, never faded,
+     and always removed: on firstWoven, on any setup failure, and by a safety timer. */
+  #cover { position: fixed; inset: 0; background: #1d2129; display: flex; align-items: center;
+           justify-content: center; font-size: 15px; color: #9aa4b5; letter-spacing: .04em; }
+
+  /* HUD: small DOM plates (partial rects over the tile — never full-bleed). Translucent tint,
+     NO backdrop-filter. DOM sits on the glass at native resolution, so it stays crisp. */
+  .hud { position: fixed; z-index: 5; background: rgba(18, 21, 28, 0.74); border: 1px solid rgba(255,255,255,.10);
+         border-radius: 12px; padding: 10px 14px; pointer-events: none; }
+  #score { top: 16px; left: 16px; min-width: 120px; }
+  #score .label { font-size: 11px; letter-spacing: .14em; opacity: .7; text-transform: uppercase; }
+  #score .value { font-size: 40px; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; color: #ffd257; }
+  #score .sub { font-size: 12px; opacity: .8; font-variant-numeric: tabular-nums; }
+  #score .value.pop { animation: pop .35s ease-out; }
+  @keyframes pop { 0% { transform: scale(1.35); color: #8ff0b0; } 100% { transform: scale(1); } }
+
+  #nav { top: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 8px 14px; }
+  #nav svg { width: 28px; height: 28px; display: block; }
+  #nav .dist { font-variant-numeric: tabular-nums; font-size: 14px; min-width: 64px; }
+  #nav .vert { font-size: 12px; opacity: .8; min-width: 46px; }
+
+  #mode { top: 16px; right: 16px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+  #mode .dot { width: 8px; height: 8px; border-radius: 50%; background: #e6c07a; }
+  #mode.woven .dot { background: #5ee08f; }
+
+  #help { bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 13px; white-space: nowrap; padding: 8px 14px; }
+  kbd { display: inline-block; min-width: 1.4em; text-align: center; padding: 0 5px; margin: 0 1px; border-radius: 4px;
+        background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); font: 12px ui-monospace, Menlo, monospace; }
+
+  #toast { top: 30%; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 700; padding: 8px 18px; display: none; }
+  #toast.show { display: block; animation: toast 1.1s ease-out forwards; }
+  @keyframes toast { 0% { opacity: 0; } 12% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+  #toast.good { color: #8ff0b0; } #toast.bad { color: #ffb08a; }
+
+  #hint { bottom: 64px; left: 50%; transform: translateX(-50%); font-size: 13px; display: none; color: #e6c07a; }
+  #paused { top: 45%; left: 50%; transform: translateX(-50%); font-size: 20px; display: none; }
+</style>
+</head>
+<body>
+<canvas id="stage" tabindex="0" aria-label="Flight game view"></canvas>
+<div id="cover">Preparing 3D…</div>
+
+<div class="hud" id="score">
+  <div class="label">Rings</div>
+  <div class="value" id="scoreValue">0</div>
+  <div class="sub" id="scoreSub">streak 0 · best 0</div>
+</div>
+<div class="hud" id="nav">
+  <svg viewBox="-12 -12 24 24" aria-hidden="true"><path id="navArrow" d="M0,-10 L7,6 L0,2 L-7,6 Z" fill="#ffd257"/></svg>
+  <span class="dist" id="navDist">—</span>
+  <span class="vert" id="navVert"></span>
+</div>
+<div class="hud" id="mode"><span class="dot"></span><span id="modeText">detecting…</span></div>
+<div class="hud" id="help">
+  <kbd>←</kbd><kbd>→</kbd> bank &amp; turn · <kbd>↑</kbd> climb · <kbd>↓</kbd> dive · <kbd>P</kbd> pause
+  <span id="depthHelp" style="display:none"> · <kbd>−</kbd><kbd>=</kbd> 3D depth</span>
+</div>
+<div class="hud" id="toast"></div>
+<div class="hud" id="hint">Step back into view of the display for 3D</div>
+<div class="hud" id="paused">Paused — press <kbd>P</kbd></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

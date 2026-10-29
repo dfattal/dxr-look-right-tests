@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spatial Globe — five cities in glasses-free 3D</title>
+<style>
+  /* Page colour = the colour the scene clears to (BG in app.js). Dark grey, never pure black:
+     the panel's crosstalk correction can't go darker than black, so a bright limb on black
+     doubles first. */
+  :root {
+    --bg: #171b22;
+    --panel: #20262f;
+    --line: #2f3742;
+    --text: #e6eaf0;
+    --muted: #9aa5b4;
+    --accent: #ffb547;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { max-width: 1200px; margin: 0 auto; padding: 22px 24px 6px; display: flex;
+    align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 24px; font-weight: 650; letter-spacing: .2px; }
+  #mode { font-size: 13px; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 2px 10px; }
+  #mode.on { color: #8ee6a8; border-color: #2f6b45; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 10px 24px 40px; display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px; gap: 22px; align-items: start; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+
+  /* The woven canvas and its wrapper stay VISUALLY BARE: no border, radius, shadow, filter,
+     opacity or mask on either (they would be woven into the packed pair, or knock the canvas
+     out of the weave). will-change from first paint so the compositor sees a settled layer
+     before the SDK registers it. */
+  .stage { position: relative; }
+  #globe { display: block; width: 100%; height: min(72vh, 660px); min-height: 320px;
+    will-change: transform; cursor: grab; touch-action: none; }
+  #globe.dragging { cursor: grabbing; }
+  #globe.over-city { cursor: pointer; }
+
+  /* Cover: on TOP of the canvas, opaque page colour, removed with a hard cut (never a fade)
+     on firstWoven — and always on a timeout / error too, so it can never stick. */
+  #cover { position: absolute; inset: 0; background: var(--bg); display: flex;
+    align-items: center; justify-content: center; color: var(--muted); font-size: 15px; }
+  #cover[hidden] { display: none; }
+
+  .hint { margin: 8px 0 0; text-align: center; font-size: 13px; color: var(--muted); }
+
+  /* Info panel sits BESIDE the canvas, not over it: DOM text is drawn at the glass, crisp and
+     at native resolution, and nothing here overlaps the woven tile (so no backdrop-filter or
+     overlay rules come into play on any browser generation). */
+  aside { background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; }
+  aside h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); font-weight: 600; }
+  .cities { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; }
+  .cities button { width: 100%; text-align: left; font: inherit; color: var(--text);
+    background: transparent; border: 1px solid var(--line); border-radius: 9px;
+    padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  .cities button:hover { background: #262d37; }
+  .cities button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cities button[aria-pressed="true"] { border-color: var(--accent); background: #2a2a24; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: none; }
+
+  #info { border-top: 1px solid var(--line); padding-top: 16px; min-height: 170px; }
+  #info .empty { color: var(--muted); margin: 0; }
+  #info h3 { margin: 0; font-size: 26px; line-height: 1.2; }
+  #info .country { color: var(--muted); margin: 2px 0 14px; }
+  #info dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; }
+  #info dt { color: var(--muted); font-size: 14px; }
+  #info dd { margin: 0; font-variant-numeric: tabular-nums; }
+  #info .pop { font-size: 20px; font-weight: 650; color: var(--accent); }
+  #info .note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
+  #close { margin-top: 14px; font: inherit; font-size: 14px; color: var(--muted);
+    background: none; border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px;
+    cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Spatial Globe</h1>
+  <span id="mode">starting…</span>
+</header>
+
+<main>
+  <div>
+    <div class="stage">
+      <canvas id="globe" aria-label="Interactive 3D globe. Drag to spin; select a city marker for details."></canvas>
+      <div id="cover">Preparing the globe…</div>
+    </div>
+    <p class="hint">Drag to spin · scroll to zoom a little · click a marker (or a city in the list)</p>
+  </div>
+
+  <aside aria-label="City information">
+    <h2>Cities</h2>
+    <ul class="cities" id="cityList"></ul>
+    <div id="info" aria-live="polite">
+      <p class="empty">Select a marker on the globe to see the city’s name and population.</p>
+    </div>
+  </aside>
+</main>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+    "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+    "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+    "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+  }
+}
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

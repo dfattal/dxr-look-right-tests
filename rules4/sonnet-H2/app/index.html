@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aquarium — DisplayXR desk ornament</title>
+<style>
+  :root { color-scheme: dark; --bg: #1c1f26; }
+  html, body { margin: 0; background: var(--bg); color: #e6e9ef;
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 40px; }
+  h1 { font-size: 26px; margin: 0 0 2px; letter-spacing: -.3px; font-weight: 600; }
+  .sub { margin: 0 0 18px; color: #aab2c0; }
+  /* The stage is a plain box. The canvas stays VISUALLY BARE (no border, radius, shadow, filter,
+     opacity on it or any ancestor): the weave splits its rect into a side-by-side pair. */
+  .stage { position: relative; width: 100%; max-width: 960px; aspect-ratio: 16/9; margin: 0 auto; background: var(--bg); }
+  #tank { position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+          cursor: grab; touch-action: none; will-change: transform; }
+  #tank.drag { cursor: grabbing; }
+  /* Opaque cover ON TOP of the canvas until the first woven frame; hard cut, never faded. */
+  #cover { position: absolute; inset: 0; background: var(--bg); display: grid; place-items: center;
+           color: #8f98a8; font-size: 14px; }
+  #cover[hidden] { display: none; }
+  .status { max-width: 960px; margin: 12px auto 0; font-size: 14px; color: #aab2c0; }
+  .status b { color: #8fe3b0; font-weight: 600; }
+  .status.flat b { color: #e6c07a; }
+  .status a { color: #7db8ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Aquarium</h1>
+  <p class="sub">Five fish, a few rocks and swaying weed in a glass tank. Drag to turn it; move your head to look around.</p>
+  <div class="stage">
+    <canvas id="tank" width="1280" height="720"></canvas>
+    <div id="cover">Filling the tank…</div>
+  </div>
+  <div id="status" class="status flat"><b>Checking for a 3D display…</b></div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

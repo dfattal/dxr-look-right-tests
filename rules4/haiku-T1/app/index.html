@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classic Rubber Duck — product</title>
+<style>
+  /* Page and tile are dark grey, never black: the display's crosstalk correction cannot go
+     darker than black, so a bright subject on black doubles first. */
+  :root { color-scheme: dark; --ink:#eceef2; --dim:#a9aeb8; --panel:#2b2e35; --bg:#1d1f23; --accent:#2563eb; }
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+  .product{max-width:1040px;margin:0 auto;padding:40px 22px 64px;display:grid;gap:32px;align-items:start}
+  @media (min-width:800px){ .product{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)} }
+
+  /* The tile. Nothing on or around the canvas is effected: no filter, opacity, border, radius
+     or shadow, so the weave can join it. The dark grey sits BEHIND the canvas. */
+  .stage{position:relative;width:100%;aspect-ratio:1/1;background:var(--panel)}
+  .stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none;will-change:transform}
+  .stage canvas:active{cursor:grabbing}
+  /* The cover sits ON TOP of the canvas until the first woven frame; a hard cut, never a fade. */
+  .cover{position:absolute;inset:0;display:grid;place-items:center;background:var(--panel);
+         color:var(--dim);font-size:14px}
+  .cover[hidden]{display:none}
+  .note{font-size:14px;color:var(--dim);margin:12px 0 0;min-height:1.6em}
+
+  .info h1{font-size:30px;line-height:1.2;margin:4px 0 6px}
+  .eyebrow{margin:0;color:var(--dim);font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+  .price{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;margin:6px 0 14px}
+  .desc{color:var(--dim);margin:0 0 22px;max-width:44ch}
+  .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  button{font:inherit;cursor:pointer;border-radius:8px;padding:11px 18px}
+  #add{background:var(--accent);color:#fff;border:0;font-weight:600;font-size:17px}
+  #add:hover{background:#1d4fd0}
+  #reset{background:transparent;color:var(--ink);border:1px solid #8886;font-size:14px}
+  button:focus-visible{outline:2px solid #7fb0ff;outline-offset:2px}
+  .cart{min-height:1.6em;margin:14px 0 0;color:#7ee2a4;font-size:15px}
+  .foot{grid-column:1/-1;font-size:13px;color:var(--dim);margin:8px 0 0}
+  .foot a{color:#7fb0ff}
+</style>
+</head>
+<body>
+<main class="product">
+  <section aria-label="Product view">
+    <div class="stage">
+      <canvas id="tile" aria-label="Classic rubber duck, 3D view. Drag to turn it."></canvas>
+      <div class="cover" id="cover">Loading 3D…</div>
+    </div>
+    <p class="note" id="note"></p>
+  </section>
+
+  <section class="info" aria-labelledby="title">
+    <p class="eyebrow">Bath toys</p>
+    <h1 id="title">Classic Rubber Duck</h1>
+    <p class="price">$12.00</p>
+    <p class="desc">A bright, classic rubber duck for bath time. Turn it around in the view to see
+      it from every side before you buy.</p>
+    <div class="actions">
+      <button type="button" id="add">Add to cart</button>
+      <button type="button" id="reset">Reset view</button>
+    </div>
+    <p class="cart" id="cartNote" role="status" aria-live="polite"></p>
+  </section>
+
+  <p class="foot">Duck model © Sony, <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0 1.0</a>.
+     Draco decoder © The Draco Authors, Apache-2.0, from three.js.</p>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+  "playcanvas": "https://cdn.jsdelivr.net/npm/playcanvas@2.22.3/build/playcanvas.mjs"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

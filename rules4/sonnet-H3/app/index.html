@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hill Flyer — DisplayXR</title>
+<style>
+  :root { color-scheme: dark; }
+  html,body{margin:0;height:100%;overflow:hidden;background:#232830;color:#f2f4f7;
+            font:600 16px/1.4 system-ui,-apple-system,Segoe UI,sans-serif}
+  /* The canvas is visually BARE (no border/radius/shadow/filter): the weave halves its rect. */
+  #stage{position:fixed;left:0;top:0;width:100vw;height:100vh;display:block;will-change:transform;touch-action:none}
+  /* Opaque dark-grey cover (never black), hard-cut away on firstWoven. */
+  #cover{position:fixed;inset:0;background:#232830}
+  .plate{position:fixed;background:#1c2128;border:1px solid #3a4452;border-radius:12px;padding:10px 18px;
+         font-variant-numeric:tabular-nums;letter-spacing:.2px}
+  #score{left:24px;top:24px;font-size:34px;line-height:1.1;min-width:150px}
+  #score small{display:block;font-size:12px;font-weight:600;opacity:.65;text-transform:uppercase;letter-spacing:1.5px}
+  #hint{left:50%;bottom:24px;transform:translateX(-50%);font-size:15px;font-weight:500;white-space:nowrap}
+  #mode{right:24px;top:24px;font-size:13px;font-weight:500;opacity:.9}
+  kbd{background:#2c343f;border:1px solid #4a5666;border-radius:5px;padding:1px 7px;font:600 13px ui-monospace,monospace}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="score" class="plate"><small>Rings</small><span id="scoreVal">0</span></div>
+<div id="mode" class="plate">Starting…</div>
+<div id="hint" class="plate"><kbd>←</kbd> <kbd>→</kbd> steer &nbsp; <kbd>↑</kbd> climb &nbsp; <kbd>↓</kbd> dive &nbsp;— fly through the rings</div>
+<div id="cover"></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./game.js"></script>
+</body>
+</html>

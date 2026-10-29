@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room walk-through — DisplayXR inline 3D</title>
+<style>
+  :root { color-scheme: dark; }
+  /* Dark grey, never pure black: the display's crosstalk correction cannot go below black. */
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #23262e; color: #eceef2;
+               font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  /* The woven canvas stays VISUALLY BARE: no border, radius, shadow, filter, opacity or
+     background, on it or on any ancestor. will-change from first paint helps the compositor join. */
+  #stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
+           will-change: transform; cursor: crosshair; touch-action: none; }
+  /* Plain translucent tint, no backdrop-filter (it would smear the weave behind it). Smaller than
+     the canvas, so it is a partial overlay, never congruent with the tile. */
+  .hud { position: fixed; z-index: 2; background: rgba(20, 22, 28, .62); border-radius: 8px;
+         padding: 10px 14px; pointer-events: none; }
+  #hint { left: 50%; bottom: 28px; transform: translateX(-50%); text-align: center; max-width: 520px; }
+  #hint b { font-weight: 600; }
+  #hint .sub { opacity: .75; font-size: 13px; }
+  kbd { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28); border-radius: 4px;
+        padding: 0 6px; font: 12px ui-monospace, Menlo, monospace; }
+  #status { left: 16px; top: 16px; font-size: 12.5px; padding: 6px 10px; opacity: .9; }
+  /* Opaque cover on top of the canvas until the first woven frame (hard cut, no fade). */
+  #cover { position: fixed; inset: 0; z-index: 5; background: #23262e; display: grid;
+           place-items: center; font-size: 18px; letter-spacing: .2px; color: #c8ccd6; }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="cover">Preparing the room…</div>
+<div class="hud" id="status" data-inline3d-overlay>starting…</div>
+<div class="hud" id="hint" data-inline3d-overlay>
+  <b>Click</b> to look around · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to walk ·
+  <kbd>Shift</kbd> to hurry<br>
+  <span class="sub">Mouse turns your head · <kbd>Esc</kbd> releases the mouse</span>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

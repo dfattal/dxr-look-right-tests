@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk tank — DisplayXR</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #1d2c33; color: #d5e3e8;
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 28px 16px 48px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 2px; }
+  .sub { margin: 0 0 18px; color: #9db3bb; font-size: 14px; }
+
+  /* The woven canvas is a bare rectangle: no border, radius, shadow, opacity, filter or
+     backdrop-filter on it or on its ancestors. Its colour is the page colour, so its edges
+     disappear into the page. */
+  .stage { position: relative; }
+  #tank { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; }
+
+  /* The cover is an opaque plate over the canvas until the first woven frame. It is cut off
+     (hidden), never faded. */
+  #cover { position: absolute; inset: 0; background: #1d2c33; }
+  #cover[hidden] { display: none; }
+
+  /* Flat text sits outside the canvas, so nothing is drawn over the woven pixels. */
+  #status { margin: 14px 0 0; min-height: 1.6em; font-size: 14px; color: #9db3bb; }
+  .foot { margin-top: 26px; font-size: 13px; color: #6f8790; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Desk tank</h1>
+  <p class="sub">A glass tank with sand, rocks, swaying plants and five fish.</p>
+
+  <div class="stage">
+    <canvas id="tank" width="1440" height="900"
+      role="img" aria-label="A glass aquarium with five fish, sand, rocks and swaying plants"></canvas>
+    <div id="cover" aria-hidden="true"></div>
+  </div>
+
+  <p id="status" role="status">Loading the tank…</p>
+
+  <p class="foot">Glasses-free depth needs a DisplayXR display in the DisplayXR Browser. Anywhere
+    else you get the same tank as a flat view.</p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

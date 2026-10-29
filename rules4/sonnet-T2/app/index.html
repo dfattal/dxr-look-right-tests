@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabletop Solar System — DisplayXR</title>
+<style>
+  :root { color-scheme: dark; }
+  html,body{margin:0;background:#15171d;color:#e6e8ee;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 20px 32px}
+  h1{font-size:24px;margin:0 0 4px;letter-spacing:-.3px}
+  .lede{margin:0 0 14px;opacity:.75}
+  /* Stage: visually bare (no border/radius/shadow/filter) so the weave sees a clean rect.
+     The dark grey under the canvas matches the scene background. */
+  .stagebox{position:relative;width:100%;aspect-ratio:16/9;background:#15171d}
+  #stage{display:block;width:100%;height:100%;will-change:transform}
+  #cover{position:absolute;inset:0;background:#15171d;display:flex;align-items:center;justify-content:center;color:#8a90a0;font-size:14px}
+  #status{margin-top:12px;font-size:14px;opacity:.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tabletop Solar System</h1>
+  <p class="lede">A sun, four planets and a moon on a tilted table, in front of a deep starfield.</p>
+  <div class="stagebox">
+    <canvas id="stage"></canvas>
+    <div id="cover">Loading…</div>
+  </div>
+  <div id="status">Detecting DisplayXR Browser…</div>
+</div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

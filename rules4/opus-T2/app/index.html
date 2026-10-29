@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orrery — a tabletop solar system in glasses-free 3D</title>
+<style>
+  /* Page colour = the scene's backdrop base colour, so the 3D tile sits in the page without a
+     visible seam. Dark grey-blue, never pure black (crosstalk correction can't go below black). */
+  :root { --bg: #0e1017; --fg: #d9dce6; --dim: #8a90a3; --panel: #171a24; --line: #262a38; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { min-height: 100svh; display: flex; flex-direction: column; align-items: center; }
+  header { width: min(96vw, 1200px); padding: 18px 0 10px; display: flex; align-items: baseline;
+    gap: 14px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: .02em; }
+  .sub { margin: 0; color: var(--dim); font-size: 14px; }
+
+  /* The woven tile. Final CSS box + will-change from the first paint (woven-canvas rule 4).
+     NOTHING visual on the canvas or its ancestors: no border, radius, shadow, filter, opacity,
+     mask — those break the weave or get split between the eyes. */
+  .stage { position: relative;
+    width: min(96vw, 1200px, max(480px, calc((100svh - 190px) * 16 / 9)));
+    aspect-ratio: 16 / 9; }
+  #scene { display: block; width: 100%; height: 100%; will-change: transform;
+    touch-action: none; cursor: grab; }
+  #scene:active { cursor: grabbing; }
+  /* Cover: ON TOP of the canvas, opaque, removed with a hard cut once the tile is woven. */
+  #cover { position: absolute; inset: 0; background: var(--bg); display: grid;
+    place-items: center; color: var(--dim); font-size: 14px; pointer-events: none; }
+  #cover[hidden] { display: none; }
+
+  /* Controls live BELOW the tile, not over it: flat DOM, panel-sharp, no backdrop-filter. */
+  .bar { width: min(96vw, 1200px); display: flex; flex-wrap: wrap; align-items: center;
+    gap: 10px 18px; padding: 12px 0 4px; }
+  button { font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+  button:hover { border-color: #3a4054; }
+  label { display: inline-flex; align-items: center; gap: 8px; color: var(--dim); font-size: 14px; }
+  label output { color: var(--fg); min-width: 3.2em; font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 120px; accent-color: #f0b35a; }
+  input[type=checkbox] { accent-color: #f0b35a; }
+  #depthCtl[hidden] { display: none; }
+  .status { margin-left: auto; font-size: 13px; color: var(--dim); }
+  .status b { color: #7fd6a4; font-weight: 600; }
+  .legend { width: min(96vw, 1200px); display: flex; flex-wrap: wrap; gap: 6px 18px;
+    padding: 6px 0 22px; color: var(--dim); font-size: 13px; }
+  .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px;
+    border-radius: 50%; margin-right: 6px; background: var(--c); vertical-align: 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Orrery</h1>
+  <p class="sub">A small solar system on your desk. Drag to turn and tilt it.</p>
+</header>
+
+<div class="stage" id="stage">
+  <canvas id="scene" aria-label="Animated solar system: a sun with four orbiting planets, one with a moon"></canvas>
+  <div id="cover">Loading…</div>
+</div>
+
+<div class="bar">
+  <button id="play" type="button">Pause</button>
+  <label>Speed <input id="speed" type="range" min="-2" max="2" step="0.05" value="0"><output id="speedOut">1×</output></label>
+  <label><input id="orbits" type="checkbox" checked> Orbit paths</label>
+  <label id="depthCtl" hidden title="Stereo strength (display-rig ipdFactor). 100% is the display's natural depth.">3D depth <input id="depth" type="range" min="0.3" max="1" step="0.05" value="1"><output id="depthOut">100%</output></label>
+  <button id="reset" type="button">Reset view</button>
+  <span class="status" id="status">Starting…</span>
+</div>
+<div class="legend">
+  <span style="--c:#ffcf6b">Sun</span>
+  <span style="--c:#b49a86">Cinder</span>
+  <span style="--c:#4f8fd0">Azure &amp; its moon</span>
+  <span style="--c:#c4683f">Rust</span>
+  <span style="--c:#d9be8c">Halcyon (ringed)</span>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

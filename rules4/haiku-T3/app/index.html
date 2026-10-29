@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A room to walk through — DisplayXR inline 3D</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #1b1c21; color: #e6e6e8; font: 16px/1.6 system-ui, -apple-system, Segoe UI, sans-serif; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 60px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.3px; }
+  .lede { opacity: .75; margin: 0 0 16px; max-width: 70ch; }
+
+  /* The stage is VISUALLY BARE: no border, radius, shadow, filter or opacity on the canvas or its
+     ancestors. The weave splits the canvas's rect down the middle, so any CSS painted over it is
+     woven with it and halved. The only things on it are the canvas and, briefly, the cover. */
+  .stage { position: relative; width: 100%; aspect-ratio: 16 / 9; }
+  #stage { display: block; width: 100%; height: 100%; will-change: transform; touch-action: none; cursor: grab; }
+  #stage.dragging { cursor: grabbing; }
+  /* The cover is held over the canvas until the browser joins it to the weave, then removed. */
+  #cover { position: absolute; inset: 0; background: #2a2c33; pointer-events: none;
+           display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+  /* Everything that is text lives BELOW the stage, never over it: it stays crisp and is not woven. */
+  .status { font: 13px/1.5 system-ui, sans-serif; margin: 14px 0 0; padding: 8px 12px; border-radius: 8px; display: inline-block; }
+  .status[data-state="pending"] { background: #ffffff10; color: #cfcfd4; }
+  .status[data-state="woven"]   { background: #134e2a55; color: #7ee2a4; border: 1px solid #24a05a55; }
+  .status[data-state="flat"]    { background: #3a2a1155; color: #e6c07a; border: 1px solid #a0742455; }
+  .hint { margin: 10px 0 0; font-size: 14px; color: #fbbf24; }
+  .controls { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; font-size: 14px; }
+  kbd { background: #ffffff1a; border: 1px solid #ffffff26; border-radius: 4px; padding: 0 5px; font: 12px ui-monospace, Menlo, monospace; }
+  button { font: 14px system-ui, sans-serif; color: #e6e6e8; background: #ffffff14; border: 1px solid #ffffff26;
+           border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  button:hover { background: #ffffff22; }
+  footer { margin-top: 30px; font-size: 13px; opacity: .6; }
+  footer a { color: #5aa8ff; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>A room to walk through</h1>
+  <p class="lede">A small furnished room, seen from the inside. Walk with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+     and look around by dragging on the picture. On a DisplayXR display the room has real depth.</p>
+
+  <div class="stage">
+    <canvas id="stage" aria-label="A walk-through of a furnished room with a window, table, chairs and a floor lamp"></canvas>
+    <div id="cover" aria-hidden="true">Loading the room…</div>
+  </div>
+
+  <div id="status" class="status" data-state="pending" role="status">Starting…</div>
+  <p id="hint" class="hint" hidden>Nobody is being tracked. Step back into view of the display.</p>
+
+  <div class="controls">
+    <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · arrow keys also work</span>
+    <span>Drag on the picture to look around</span>
+    <button id="capture" type="button">Capture mouse for mouse-look</button>
+  </div>
+
+  <footer>Built with <a href="https://threejs.org">three.js</a> and the
+    <a href="../sdk/docs/authoring-inline-3d.md">DisplayXR inline-3D SDK</a>.</footer>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

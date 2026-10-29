@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Globe — DisplayXR inline 3D</title>
+<style>
+  :root { color-scheme: dark; --bg:#15181f; --panel:#1d212b; --line:#2c3240; --text:#e9ecf2; --dim:#9aa3b5; --accent:#ffb020; }
+  * { box-sizing: border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--text);
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .wrap { max-width:1280px; margin:0 auto; padding:20px 20px 32px; }
+  h1 { font-size:26px; margin:0; letter-spacing:-.4px; }
+  .sub { color:var(--dim); margin:2px 0 14px; font-size:15px; }
+  .layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:20px; align-items:start; }
+  @media (max-width:900px) { .layout { grid-template-columns:1fr; } }
+
+  /* The stage and canvas are VISUALLY BARE: no border, radius, shadow, filter, opacity or mask on
+     the canvas or any ancestor (they break the weave). The window dissolves into the page via the
+     per-eye EdgeFeather. The page colour is dark grey, never pure black. */
+  .stage { position:relative; width:min(100%, 125vh); margin:0 auto; background:var(--bg); }
+  #globe { display:block; width:100%; aspect-ratio:16/10; cursor:grab; touch-action:none; outline:none; }
+  #globe.dragging { cursor:grabbing; }
+  #globe.hot { cursor:pointer; }
+  /* Opaque cover kept over the canvas until the first woven frame (or a timeout); hard cut. */
+  #cover { position:absolute; inset:0; background:var(--bg); display:flex; align-items:center;
+    justify-content:center; color:var(--dim); font-size:15px; }
+
+  .side { display:flex; flex-direction:column; gap:14px; }
+  #info { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px; min-height:196px; }
+  #info .kicker { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
+  #info h2 { font-size:30px; margin:4px 0 0; letter-spacing:-.5px; }
+  #info .country { color:var(--dim); margin:0 0 12px; }
+  #info .pop { font-size:38px; font-weight:650; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1.1; }
+  #info .popl { color:var(--dim); font-size:13px; margin-bottom:10px; }
+  #info .ll { color:var(--dim); font-size:13px; font-variant-numeric:tabular-nums; }
+  #info .hint { color:var(--dim); margin:8px 0 0; }
+  #info .close { float:right; background:none; border:1px solid var(--line); color:var(--dim);
+    border-radius:8px; width:32px; height:32px; font-size:18px; line-height:1; cursor:pointer; }
+  #info .close:hover { color:var(--text); border-color:var(--dim); }
+  .cities { display:flex; flex-wrap:wrap; gap:8px; }
+  .cities button { background:var(--panel); color:var(--text); border:1px solid var(--line);
+    border-radius:999px; padding:8px 14px; font:inherit; font-size:14px; cursor:pointer; }
+  .cities button:hover { border-color:var(--dim); }
+  .cities button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#1a1305; font-weight:600; }
+  button:focus-visible, #globe:focus-visible { outline:2px solid #6db3ff; outline-offset:2px; }
+  .status { font-size:13px; color:var(--dim); }
+  .status b { color:#7ee2a4; font-weight:600; }
+  .tips { font-size:13px; color:var(--dim); margin:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Globe</h1>
+  <p class="sub">Drag to spin. Click a city marker for details.</p>
+  <div class="layout">
+    <div class="stage">
+      <canvas id="globe" width="1280" height="800" tabindex="0"
+              aria-label="Interactive 3D globe. Drag or use arrow keys to rotate; use the city buttons to select a city."></canvas>
+      <div id="cover">Preparing 3D…</div>
+    </div>
+    <div class="side">
+      <section id="info" aria-live="polite"></section>
+      <div class="cities" id="cities" role="group" aria-label="Cities"></div>
+      <div class="status" id="status">initializing…</div>
+      <p class="tips">Populations are approximate city-proper figures.</p>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

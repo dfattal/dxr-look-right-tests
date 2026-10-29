@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar system · DisplayXR inline-3D</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #1e222b; color: #d7dce6;
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 56px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 4px; }
+  .sub { margin: 0 0 22px; color: #9aa3b5; }
+
+  /* The woven canvas stays visually bare: no border, radius, shadow, filter, opacity or
+     backdrop on it or on .stage (woven-canvas rules 7 and 10). The page behind it is the same
+     dark grey as the scene's clear colour, so the rectangle's edge does not show. */
+  .stage { position: relative; width: 100%; max-width: 720px; margin: 0 auto; }
+  #scene { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; will-change: transform; }
+
+  /* Opaque cover over the canvas until the first woven frame (rule 5). A hard cut when it goes. */
+  #cover { position: absolute; inset: 0; background: #1e222b; }
+  [hidden] { display: none !important; }
+
+  .status { max-width: 720px; margin: 14px auto 0; font-size: 14px; color: #9aa3b5; }
+  .status b { color: #4ade80; font-weight: 600; }
+  button { margin-top: 12px; font: inherit; font-size: 14px; color: #d7dce6; background: #2a303c;
+    border: 1px solid #3b4558; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
+  button[aria-pressed="true"] { background: #3b4558; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Solar system</h1>
+  <p class="sub">Four planets orbit a sun, and one of them has a moon. The scene is a
+     glasses-free 3D element in an ordinary web page.</p>
+
+  <div class="stage">
+    <canvas id="scene" aria-label="Animated solar system"></canvas>
+    <div id="cover" aria-hidden="true"></div>
+  </div>
+
+  <div class="status" id="status">Starting…</div>
+  <button type="button" id="pause" aria-pressed="false">Pause</button>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

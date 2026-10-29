@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earth — DisplayXR inline-3D</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #2a2d33; color: #e8eaed;
+               font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 56px; }
+  h1 { font-size: 26px; margin: 0 0 4px; font-weight: 650; }
+  .sub { margin: 0 0 24px; opacity: .72; font-size: 15px; }
+
+  .layout { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; }
+
+  /* The woven canvas is bare: no border, radius, shadow, opacity or filter on it or on its
+     wrapper. Everything around it sits beside it, never on top of it. */
+  .stage { position: relative; max-width: 560px; }
+  canvas#globe { display: block; width: 100%; aspect-ratio: 1 / 1; cursor: grab; }
+  canvas#globe:active { cursor: grabbing; }
+  /* Opaque cover until the first woven frame; a hard cut, never a fade. */
+  .cover { position: absolute; inset: 0; background: #2a2d33; }
+  .hint { font-size: 13px; opacity: .65; margin: 10px 0 0; min-height: 1.5em; }
+
+  .panel { background: #353942; border-radius: 10px; padding: 18px 18px 20px; }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+              opacity: .7; margin: 0 0 10px; font-weight: 600; }
+  .cities { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; }
+  .cities button { width: 100%; text-align: left; font: inherit; font-size: 15px; color: inherit;
+                   background: transparent; border: 1px solid #5a606c; border-radius: 6px;
+                   padding: 7px 10px; cursor: pointer; }
+  .cities button:hover { background: #3f444f; }
+  .cities button[aria-pressed="true"] { background: #4a5263; border-color: #8c96a8; }
+  .cities button:focus-visible { outline: 2px solid #7fb0ff; outline-offset: 2px; }
+
+  .info { border-top: 1px solid #4a505c; padding-top: 14px; min-height: 7.5em; }
+  .info .empty { margin: 0; opacity: .7; font-size: 14px; }
+  .info h3 { font-size: 22px; margin: 0 0 8px; font-weight: 650; }
+  .info dl { margin: 0; }
+  .info dt { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; opacity: .65; }
+  .info dd { margin: 0 0 10px; font-size: 16px; }
+  .info .pop { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .status { font-size: 13px; opacity: .8; margin: 14px 0 0; }
+
+  @media (max-width: 760px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+  }
+  .foot { margin-top: 30px; font-size: 13px; opacity: .6; }
+  .foot a { color: #8fb8ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Earth</h1>
+  <p class="sub">A procedurally coloured globe in a DisplayXR inline-3D window. Drag to spin; click a marker, or pick a city.</p>
+
+  <div class="layout">
+    <div>
+      <div class="stage">
+        <canvas id="globe" role="img" aria-label="Rotating 3D globe with markers for London, Tokyo, New York, Sydney and Nairobi" width="1024" height="512"></canvas>
+        <div class="cover" id="cover" aria-hidden="true"></div>
+      </div>
+      <p class="hint" id="hint">Drag to spin the globe.</p>
+    </div>
+
+    <aside class="panel">
+      <h2>Cities</h2>
+      <ul class="cities">
+        <li><button type="button" data-city="london" aria-pressed="false">London</button></li>
+        <li><button type="button" data-city="tokyo" aria-pressed="false">Tokyo</button></li>
+        <li><button type="button" data-city="new-york" aria-pressed="false">New York</button></li>
+        <li><button type="button" data-city="sydney" aria-pressed="false">Sydney</button></li>
+        <li><button type="button" data-city="nairobi" aria-pressed="false">Nairobi</button></li>
+      </ul>
+
+      <section class="info" id="info" aria-live="polite">
+        <p class="empty" id="empty">Click a marker on the globe, or choose a city above.</p>
+        <div id="card" hidden>
+          <h3 id="cityName"></h3>
+          <dl>
+            <dt>Population (approx.)</dt>
+            <dd class="pop" id="cityPop"></dd>
+            <dt>Basis</dt>
+            <dd id="cityBasis"></dd>
+          </dl>
+        </div>
+      </section>
+      <p class="status" id="status" hidden></p>
+    </aside>
+  </div>
+
+  <p class="foot">Runs in the <a href="https://github.com/DisplayXR/displayxr-browser">DisplayXR Browser</a> for glasses-free 3D;
+     in any other browser the globe still spins and works in 2D. Populations are approximate.</p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js",
+  "@displayxr/inline3d/viewer": "../../sdk/js/inline3d-viewer.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

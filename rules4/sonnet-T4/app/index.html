@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly Sales by Region — 3D</title>
+<style>
+  /* Dark GREY, never pure black: the display's crosstalk correction cannot go below black, so
+     bright edges on #000 ghost. The page, the canvas surround and the cover all use this grey. */
+  :root { --bg:#262a33; --fg:#eef1f6; --mut:#aab2c0; --panel:#323846; }
+  html,body{margin:0;background:var(--bg);color:var(--fg);
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:22px 20px 28px}
+  h1{font-size:28px;margin:0 0 2px;font-weight:650;letter-spacing:.2px}
+  .sub{margin:0 0 12px;color:var(--mut);font-size:15px}
+  .legend{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 14px;padding:0;list-style:none;font-size:16px}
+  .legend li{display:flex;align-items:center;gap:8px}
+  .sw{width:16px;height:16px;border-radius:4px;display:inline-block}
+  /* The canvas stays visually BARE: no border/radius/shadow/background/filter/opacity (they would
+     be woven into the side-by-side pair). Edges are feathered per eye inside the scene instead. */
+  .stage{position:relative;margin:0 auto}
+  #chart{display:block;width:100%;aspect-ratio:16/9;touch-action:none;cursor:grab}
+  #chart:active{cursor:grabbing}
+  /* Cover removed on firstWoven (or after a timeout / error) so the raw SBS pair never shows. */
+  #cover{position:absolute;inset:0;background:var(--bg);pointer-events:none}
+  .controls{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-top:14px;
+    padding:12px 16px;background:var(--panel);border-radius:10px}
+  .controls label{display:flex;align-items:center;gap:12px;flex:1;min-width:260px}
+  .controls input[type=range]{flex:1;min-width:120px;accent-color:#6aa9ff;height:28px}
+  #strengthVal{min-width:3.2em;text-align:right;font-variant-numeric:tabular-nums}
+  button{font:inherit;font-weight:600;color:#fff;background:#3b6fd4;border:0;border-radius:8px;
+    padding:9px 18px;cursor:pointer;min-width:96px}
+  button:hover{background:#4a7fe6}
+  button:focus-visible,input:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  input:disabled{opacity:.45}
+  .status{margin-top:10px;font-size:13px;color:var(--mut)}
+  .status b{color:var(--fg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Quarterly Sales by Region</h1>
+  <p class="sub">Revenue in millions, Q1–Q4 &middot; drag the chart to turn it</p>
+  <ul class="legend" aria-label="Legend">
+    <li><span class="sw" style="background:#4cc9f0"></span>North</li>
+    <li><span class="sw" style="background:#f7b538"></span>South</li>
+    <li><span class="sw" style="background:#ef476f"></span>West</li>
+  </ul>
+
+  <div class="stage">
+    <canvas id="chart" width="1280" height="720" aria-label="3D bar chart of quarterly sales by region"></canvas>
+    <div id="cover"></div>
+  </div>
+
+  <div class="controls">
+    <label for="strength">3D strength
+      <input id="strength" type="range" min="0" max="100" step="1" value="100">
+      <span id="strengthVal">100%</span>
+    </label>
+    <button id="mode" type="button" aria-pressed="true">Switch to 2D</button>
+  </div>
+  <div class="status" id="status">initializing…</div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+  "@displayxr/inline3d": "../../sdk/js/inline3d.js",
+  "@displayxr/inline3d/three": "../../sdk/js/inline3d-three.js"
+} }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
